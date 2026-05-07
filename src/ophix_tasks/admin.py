@@ -212,13 +212,13 @@ class ScheduledTaskAdmin(admin.ModelAdmin):
     actions = None
     fieldsets = [
         (None, {
-            "fields": [("name", "schedule", "enabled"), "description", "command"],
+            "fields": ["name", "schedule", "enabled", "description", "command"],
         }),
         ("Schedule", {
-            "fields": [("run_at", "interval"), ("starts_at", "ends_at")],
+            "fields": ["run_at", "interval", "starts_at", "ends_at"],
         }),
         ("Output handling", {
-            "fields": [("stdout_handling", "stderr_handling"), "log_file"],
+            "fields": ["stdout_handling", "stderr_handling", "log_file"],
         }),
     ]
     formfield_overrides = {
