@@ -30,15 +30,15 @@ Each task has exactly one scheduling mode:
 
 | Field | Purpose |
 | --- | --- |
-| `run_at` | One-off: exact UTC datetime to execute |
+| `run_at` | One-off: exact datetime to execute |
 | `interval` | Recurring: standard cron expression (e.g. `0 2 * * *`) |
 
 Time bounds are optional and enforced server-side — the server omits tasks outside their active window from API responses:
 
 | Field | Meaning |
 | --- | --- |
-| `starts_at` | Do not include in responses before this UTC datetime |
-| `ends_at` | Stop including in responses after this UTC datetime |
+| `starts_at` | Do not include in responses before this datetime |
+| `ends_at` | Stop including in responses after this datetime |
 
 Both set → bounded window. Only `starts_at` → delayed start. Only `ends_at` → run until this date.
 

@@ -54,7 +54,7 @@ class ScheduledTask(models.Model):
         _("run at"),
         null=True,
         blank=True,
-        help_text=_("One-off task: the exact UTC datetime to execute. Leave blank for a recurring task."),
+        help_text=_("One-off task: the exact date and time to execute. Leave blank for a recurring task."),
     )
     interval = models.CharField(
         _("interval"),
@@ -69,13 +69,13 @@ class ScheduledTask(models.Model):
         _("starts at"),
         null=True,
         blank=True,
-        help_text=_("Do not include in responses before this UTC datetime."),
+        help_text=_("Do not include in responses before this date and time."),
     )
     ends_at = models.DateTimeField(
         _("ends at"),
         null=True,
         blank=True,
-        help_text=_("Stop including in responses after this UTC datetime."),
+        help_text=_("Stop including in responses after this date and time."),
     )
 
     enabled = models.BooleanField(_("enabled"), default=True)
