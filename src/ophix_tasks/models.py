@@ -86,6 +86,18 @@ class ScheduledTask(models.Model):
 
     enabled = models.BooleanField(_("enabled"), default=True)
 
+    # Reporting — server controls whether stdout/stderr are captured and stored.
+    report_output = models.BooleanField(
+        _("report output"),
+        default=False,
+        help_text=_("Capture stdout and store in the execution log."),
+    )
+    report_error = models.BooleanField(
+        _("report errors"),
+        default=False,
+        help_text=_("Capture stderr and store in the execution log."),
+    )
+
     class Meta:
         ordering = ("schedule__name", "name")
         verbose_name = _("Scheduled Task")
@@ -93,6 +105,32 @@ class ScheduledTask(models.Model):
 
     def __str__(self):
         return f"{self.schedule.name} / {self.name}"
+
+
+class TaskExecutionLog(models.Model):
+    task = models.ForeignKey(
+        ScheduledTask,
+        verbose_name=_("task"),
+        on_delete=models.CASCADE,
+        related_name="execution_logs",
+    )
+    client = models.ForeignKey(
+        "ophix_core.Client",
+        verbose_name=_("client"),
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="+",
+    )
+    reported_at = models.DateTimeField(_("reported at"), auto_now_add=True)
+    output = models.TextField(_("output"), blank=True, default="")
+
+    class Meta:
+        ordering = ("-reported_at",)
+        verbose_name = _("Task Execution Log")
+        verbose_name_plural = _("Task Execution Logs")
+
+    def __str__(self):
+        return "{} @ {}".format(self.task, self.reported_at)
 
 
 class ClientScheduleAccess(ClientArtifactBase):

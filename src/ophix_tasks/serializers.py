@@ -7,4 +7,8 @@ class ScheduledTaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ScheduledTask
-        fields = ["id", "schedule", "name", "command", "run_at", "interval", "starts_at", "ends_at"]
+        fields = [
+            "id", "schedule", "name", "command",
+            "run_at", "interval", "starts_at", "ends_at",
+            "report_output", "report_error",
+        ]

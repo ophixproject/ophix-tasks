@@ -11,7 +11,7 @@ from django.db import models
 from django.utils.html import format_html, mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from .models import Schedule, ScheduledTask, ClientScheduleAccess
+from .models import Schedule, ScheduledTask, ClientScheduleAccess, TaskExecutionLog
 
 
 # ============================================================
@@ -21,7 +21,7 @@ from .models import Schedule, ScheduledTask, ClientScheduleAccess
 class ScheduledTaskInline(admin.TabularInline):
     model = ScheduledTask
     extra = 1
-    fields = ("name", "command", "run_at", "interval", "starts_at", "ends_at", "enabled")
+    fields = ("name", "command", "run_at", "interval", "starts_at", "ends_at", "enabled", "report_output", "report_error")
     classes = ("collapse",)
     formfield_overrides = {
         models.TextField: {"widget": forms.Textarea(attrs={"rows": 2, "cols": 60})},
@@ -137,9 +137,9 @@ class ScheduleAdmin(admin.ModelAdmin):
 
 @admin.register(ScheduledTask)
 class ScheduledTaskAdmin(admin.ModelAdmin):
-    list_display = ("name", "schedule", "command_short", "run_at", "interval", "starts_at", "ends_at", "enabled")
-    list_editable = ("enabled",)
-    list_filter = ("enabled", "schedule")
+    list_display = ("name", "schedule", "command_short", "run_at", "interval", "starts_at", "ends_at", "enabled", "report_output", "report_error")
+    list_editable = ("enabled", "report_output", "report_error")
+    list_filter = ("enabled", "report_output", "report_error", "schedule")
     search_fields = ("name", "command", "schedule__name")
     ordering = ("schedule__name", "name")
     autocomplete_fields = ("schedule",)
@@ -171,3 +171,27 @@ if getattr(settings, "SHOW_CLIENT_ARTIFACT_MODEL", False):
         def short_notes(self, obj):
             return (obj.notes[:50] + "…") if obj.notes and len(obj.notes) > 50 else obj.notes
         short_notes.short_description = _("Notes")
+
+
+# ============================================================
+# TaskExecutionLog admin — read-only
+# ============================================================
+
+@admin.register(TaskExecutionLog)
+class TaskExecutionLogAdmin(admin.ModelAdmin):
+    list_display = ("task", "client", "reported_at", "output_short")
+    list_filter = ("task__schedule", "task", "client")
+    search_fields = ("task__name", "client__name", "output")
+    ordering = ("-reported_at",)
+    readonly_fields = ("task", "client", "reported_at", "output")
+    actions = None
+
+    def output_short(self, obj):
+        return (obj.output[:80] + "…") if len(obj.output) > 80 else obj.output
+    output_short.short_description = _("Output")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
