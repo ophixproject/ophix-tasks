@@ -4,8 +4,9 @@
     width: auto !important;
 }
 
-/* Constrain the calendar popup to the width of its content */
-div.calendarbox {
+/* Constrain the calendar and clock popups to the width of their content */
+div.calendarbox,
+div.clockbox {
     width: fit-content !important;
 }
 
