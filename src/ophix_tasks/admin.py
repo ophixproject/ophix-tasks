@@ -1,7 +1,8 @@
 """
 ophix_tasks.admin
 ~~~~~~~~~~~~~~~~~
-Admin registrations for Schedule, ScheduledTask, and ClientScheduleAccess.
+Admin registrations for Schedule, ScheduledTask, ClientScheduleAccess,
+and TaskExecutionLog.
 """
 
 from django.contrib import admin
@@ -22,7 +23,11 @@ from .models import Schedule, ScheduledTask, ClientScheduleAccess, TaskExecution
 class ScheduledTaskInline(admin.TabularInline):
     model = ScheduledTask
     extra = 1
-    fields = ("name", "command", "run_at", "interval", "starts_at", "ends_at", "enabled", "report_output", "report_error")
+    fields = (
+        "name", "command", "description",
+        "run_at", "interval", "starts_at", "ends_at",
+        "enabled", "stdout_handling", "stderr_handling", "log_file",
+    )
     classes = ("collapse",)
     formfield_overrides = {
         models.TextField: {"widget": forms.Textarea(attrs={"rows": 2, "cols": 60})},
@@ -38,7 +43,7 @@ class ClientScheduleInlineForClient(admin.TabularInline):
     model = ClientScheduleAccess
     extra = 0
     autocomplete_fields = ("schedule",)
-    fields = ("schedule", "enabled", "notes")
+    fields = ("schedule", "enabled", "can_update", "notes")
     classes = ("collapse",)
     verbose_name = _("Schedule")
     verbose_name_plural = _("Schedules")
@@ -52,7 +57,7 @@ class ClientScheduleInlineForSchedule(admin.TabularInline):
     model = ClientScheduleAccess
     extra = 0
     autocomplete_fields = ("client",)
-    fields = ("client", "enabled", "notes")
+    fields = ("client", "enabled", "can_update", "notes")
     classes = ("collapse",)
     verbose_name = _("Client")
     verbose_name_plural = _("Clients")
@@ -74,7 +79,7 @@ def linked_schedules(self, obj):
     for cs in links:
         label = cs.schedule.name
         if cs.enabled and cs.schedule.enabled:
-            items.append(f"• {label}")
+            items.append("• {}".format(label))
         else:
             items.append(
                 format_html(
@@ -119,7 +124,7 @@ class ScheduleAdmin(admin.ModelAdmin):
         for cs in links:
             label = cs.client.name
             if cs.enabled and cs.client.enabled:
-                items.append(f"• {label}")
+                items.append("• {}".format(label))
             else:
                 items.append(
                     format_html(
@@ -142,10 +147,14 @@ class ScheduleAdmin(admin.ModelAdmin):
 
 @admin.register(ScheduledTask)
 class ScheduledTaskAdmin(admin.ModelAdmin):
-    list_display = ("name", "schedule", "command_short", "run_at", "interval", "starts_at", "ends_at", "enabled", "report_output", "report_error")
-    list_editable = ("enabled", "report_output", "report_error")
-    list_filter = ("enabled", "report_output", "report_error", "schedule")
-    search_fields = ("name", "command", "schedule__name")
+    list_display = (
+        "name", "schedule", "command_short", "description_short",
+        "run_at", "interval", "enabled",
+        "stdout_handling", "stderr_handling",
+    )
+    list_editable = ("enabled",)
+    list_filter = ("enabled", "stdout_handling", "stderr_handling", "schedule")
+    search_fields = ("name", "command", "description", "schedule__name")
     ordering = ("schedule__name", "name")
     autocomplete_fields = ("schedule",)
     actions = None
@@ -162,6 +171,12 @@ class ScheduledTaskAdmin(admin.ModelAdmin):
         return (cmd[:60] + "…") if len(cmd) > 60 else cmd
     command_short.short_description = _("Command")
 
+    def description_short(self, obj):
+        if not obj.description:
+            return ""
+        return (obj.description[:50] + "…") if len(obj.description) > 50 else obj.description
+    description_short.short_description = _("Description")
+
 
 # ============================================================
 # ClientScheduleAccess admin (optional)
@@ -171,7 +186,7 @@ if getattr(settings, "SHOW_CLIENT_ARTIFACT_MODEL", False):
 
     @admin.register(ClientScheduleAccess)
     class ClientScheduleAccessAdmin(admin.ModelAdmin):
-        list_display = ("client", "schedule", "enabled", "short_notes")
+        list_display = ("client", "schedule", "enabled", "can_update", "short_notes")
         list_editable = ("enabled",)
         list_filter = ("enabled", "client__host", "client", "schedule")
         search_fields = ("client__name", "schedule__name", "notes")

@@ -1,0 +1,2 @@
+[ophix.plugins]
+ophix_tasks = ophix_tasks

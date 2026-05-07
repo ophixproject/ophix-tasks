@@ -4,15 +4,20 @@ ophix_tasks.views
 API views for the Task Scheduling domain plugin.
 
 GET /api/tasks/
-    Returns a flat JSON array of all currently active tasks for the
-    authenticated client, aggregated across all schedules the client
-    has access to. Server-side time filtering (starts_at / ends_at)
-    is applied here — Tier 2 clients receive only what is active now.
+    Returns all tasks for the client's active schedule, including disabled
+    tasks (marked enabled=False) so Tier 2 clients can comment them out
+    rather than silently removing them. Time bounds (starts_at/ends_at)
+    are still enforced server-side. If the schedule or access record is
+    disabled, no tasks are returned.
+
+POST /api/tasks/
+    Creates a task in a schedule the client has can_update access to.
+    Skips if a task with the same command already exists in that schedule.
+    Returns {"status": "created"|"skipped", "id": <int>}.
 
 POST /api/tasks/<id>/report/
     Receives execution output from a Tier 1 client and stores it in
-    TaskExecutionLog. The client must have access to the schedule that
-    owns the task. Body: {"output": "<text>"}.
+    TaskExecutionLog. Body: {"output": "<text>"}.
 """
 
 from django.db.models import Q
@@ -26,7 +31,7 @@ from ophix.core.auth import ClientTokenAuthentication
 from ophix.core.audit import record_access
 
 from .models import ClientScheduleAccess, ScheduledTask, TaskExecutionLog
-from .serializers import ScheduledTaskSerializer
+from .serializers import ScheduledTaskSerializer, TaskCreateSerializer
 
 
 class TaskListView(APIView):
@@ -46,9 +51,10 @@ class TaskListView(APIView):
 
         schedule_ids = [a.schedule_id for a in access_qs]
 
+        # Include disabled tasks so Tier 2 clients can comment them out.
+        # Time bounds and schedule/access enablement are still enforced.
         tasks = ScheduledTask.objects.filter(
             schedule_id__in=schedule_ids,
-            enabled=True,
         ).filter(
             Q(starts_at__isnull=True) | Q(starts_at__lte=now),
             Q(ends_at__isnull=True) | Q(ends_at__gte=now),
@@ -59,6 +65,51 @@ class TaskListView(APIView):
 
         return Response(ScheduledTaskSerializer(tasks, many=True).data)
 
+    def post(self, request):
+        client = request.user
+
+        serializer = TaskCreateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        data = serializer.validated_data
+
+        try:
+            access = ClientScheduleAccess.objects.select_related("schedule").get(
+                client=client,
+                schedule__name=data["schedule"],
+                enabled=True,
+                can_update=True,
+                schedule__enabled=True,
+            )
+        except ClientScheduleAccess.DoesNotExist:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        existing = ScheduledTask.objects.filter(
+            schedule=access.schedule,
+            command=data["command"],
+        ).first()
+
+        if existing:
+            return Response({"status": "skipped", "id": existing.pk}, status=status.HTTP_200_OK)
+
+        task = ScheduledTask.objects.create(
+            schedule=access.schedule,
+            name=data["name"],
+            command=data["command"],
+            description=data.get("description", ""),
+            interval=data.get("interval", ""),
+            run_at=data.get("run_at"),
+            starts_at=data.get("starts_at"),
+            ends_at=data.get("ends_at"),
+            stdout_handling=data.get("stdout_handling", "inherit"),
+            stderr_handling=data.get("stderr_handling", "inherit"),
+            log_file=data.get("log_file", ""),
+        )
+
+        record_access(access, "POST")
+        return Response({"status": "created", "id": task.pk}, status=status.HTTP_201_CREATED)
+
 
 class TaskReportView(APIView):
     authentication_classes = [ClientTokenAuthentication]
@@ -67,7 +118,7 @@ class TaskReportView(APIView):
         client = request.user
 
         try:
-            task = ScheduledTask.objects.select_related("schedule").get(pk=task_id, enabled=True)
+            task = ScheduledTask.objects.select_related("schedule").get(pk=task_id)
         except ScheduledTask.DoesNotExist:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 

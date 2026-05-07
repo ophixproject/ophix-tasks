@@ -15,13 +15,31 @@ ScheduledTask
 
 ClientScheduleAccess
     Join table linking a Client to a Schedule with per-link permission
-    flags inherited from ClientArtifactBase.
+    flags inherited from ClientArtifactBase. Only one enabled access
+    record is permitted per client at a time — enabling one automatically
+    disables all others for the same client.
 """
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from ophix.core.models import ClientArtifactBase
+
+
+STDOUT_CHOICES = [
+    ("inherit", "Default (cron handles output)"),
+    ("report", "Report to server"),
+    ("null", "Discard (/dev/null)"),
+    ("file", "Append to log file"),
+]
+
+STDERR_CHOICES = [
+    ("inherit", "Default (cron handles errors)"),
+    ("report", "Report to server"),
+    ("null", "Discard (/dev/null)"),
+    ("merge", "Merge with stdout (2>&1)"),
+    ("file", "Append to log file"),
+]
 
 
 class Schedule(models.Model):
@@ -48,6 +66,12 @@ class ScheduledTask(models.Model):
     )
     name = models.CharField(_("name"), max_length=200)
     command = models.TextField(_("command"))
+    description = models.TextField(
+        _("description"),
+        blank=True,
+        default="",
+        help_text=_("Optional note written as a comment above the cron entry."),
+    )
 
     # Scheduling — exactly one of run_at or interval must be set.
     run_at = models.DateTimeField(
@@ -80,16 +104,27 @@ class ScheduledTask(models.Model):
 
     enabled = models.BooleanField(_("enabled"), default=True)
 
-    # Reporting — server controls whether stdout/stderr are captured and stored.
-    report_output = models.BooleanField(
-        _("report output"),
-        default=False,
-        help_text=_("Capture stdout and store in the execution log."),
+    # Output handling — server controls where stdout and stderr go.
+    stdout_handling = models.CharField(
+        _("stdout handling"),
+        max_length=10,
+        choices=STDOUT_CHOICES,
+        default="inherit",
+        help_text=_("Where to send standard output."),
     )
-    report_error = models.BooleanField(
-        _("report errors"),
-        default=False,
-        help_text=_("Capture stderr and store in the execution log."),
+    stderr_handling = models.CharField(
+        _("stderr handling"),
+        max_length=10,
+        choices=STDERR_CHOICES,
+        default="inherit",
+        help_text=_("Where to send standard error."),
+    )
+    log_file = models.CharField(
+        _("log file"),
+        max_length=500,
+        blank=True,
+        default="",
+        help_text=_("Path to append output to when stdout or stderr handling is set to 'file'."),
     )
 
     class Meta:
@@ -142,3 +177,11 @@ class ClientScheduleAccess(ClientArtifactBase):
 
     def __str__(self):
         return f"{self.client} → {self.schedule.name}"
+
+    def save(self, *args, **kwargs):
+        if self.enabled:
+            ClientScheduleAccess.objects.filter(
+                client=self.client,
+                enabled=True,
+            ).exclude(pk=self.pk).update(enabled=False)
+        super().save(*args, **kwargs)
