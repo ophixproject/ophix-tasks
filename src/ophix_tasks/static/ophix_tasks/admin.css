@@ -3,3 +3,12 @@
 .vTimeField {
     width: auto !important;
 }
+
+/* Constrain the calendar popup to the width of its content */
+div.calendar {
+    width: fit-content !important;
+}
+
+div.calendar table {
+    width: auto !important;
+}
