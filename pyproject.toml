@@ -28,4 +28,5 @@ where = ["src"]
 [tool.setuptools.package-data]
 "ophix_tasks" = [
     "deploy_templates/**/*",
+    "static/**/*",
 ]

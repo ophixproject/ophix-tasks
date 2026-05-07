@@ -1,0 +1,5 @@
+/* Constrain datetime picker inputs to their natural width */
+.vDateField,
+.vTimeField {
+    width: auto !important;
+}

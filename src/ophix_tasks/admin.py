@@ -29,6 +29,9 @@ class ScheduledTaskInline(admin.TabularInline):
         models.DateTimeField: {"widget": AdminSplitDateTime(attrs={"style": "width: auto;"})},
     }
 
+    class Media:
+        css = {"all": ("ophix_tasks/admin.css",)}
+
 
 class ClientScheduleInlineForClient(admin.TabularInline):
     """Shown on Client admin — registered via AppConfig.ready()."""
@@ -150,6 +153,9 @@ class ScheduledTaskAdmin(admin.ModelAdmin):
         models.TextField: {"widget": forms.Textarea(attrs={"rows": 3, "cols": 120})},
         models.DateTimeField: {"widget": AdminSplitDateTime(attrs={"style": "width: auto;"})},
     }
+
+    class Media:
+        css = {"all": ("ophix_tasks/admin.css",)}
 
     def command_short(self, obj):
         cmd = obj.command
