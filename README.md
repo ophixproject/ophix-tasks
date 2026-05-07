@@ -8,7 +8,7 @@ Provides a central schedule store for fleet hosts. Operators define named Schedu
 
 ## Installation
 
-```
+```bash
 pip install ophix-tasks
 ```
 
@@ -29,14 +29,14 @@ An individual task within a Schedule. Defines what to run and when.
 Each task has exactly one scheduling mode:
 
 | Field | Purpose |
-|---|---|
+| --- | --- |
 | `run_at` | One-off: exact UTC datetime to execute |
 | `interval` | Recurring: standard cron expression (e.g. `0 2 * * *`) |
 
 Time bounds are optional and enforced server-side — the server omits tasks outside their active window from API responses:
 
 | Field | Meaning |
-|---|---|
+| --- | --- |
 | `starts_at` | Do not include in responses before this UTC datetime |
 | `ends_at` | Stop including in responses after this UTC datetime |
 
@@ -98,7 +98,7 @@ Two admin views are provided:
 ## Settings
 
 | Setting | Default | Description |
-|---|---|---|
+| --- | --- | --- |
 | `SERVER_NAME` | `taskserver` | Human-readable name shown in the admin footer |
 
 Set in `.env`. All other behaviour is controlled via the admin UI.
@@ -107,7 +107,7 @@ Set in `.env`. All other behaviour is controlled via the admin UI.
 
 ## Server setup
 
-```
+```bash
 pip install ophix-tasks ophix-server-base ophix-docs
 ophix-manage configure_install taskserver
 ophix-manage run_install taskserver
