@@ -5,6 +5,10 @@
 }
 
 /* Constrain the calendar popup to the width of its content */
+div.calendarbox {
+    width: fit-content !important;
+}
+
 div.calendar {
     width: fit-content !important;
 }
