@@ -20,6 +20,7 @@ ClientScheduleAccess
     disables all others for the same client.
 """
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -126,6 +127,12 @@ class ScheduledTask(models.Model):
         default="",
         help_text=_("Path to append output to when stdout or stderr handling is set to 'file'."),
     )
+
+    def clean(self):
+        if self.run_at and self.interval:
+            raise ValidationError(
+                _("Set either 'run at' for a one-off task or 'interval' for a recurring task, not both.")
+            )
 
     class Meta:
         ordering = ("schedule__name", "name")
