@@ -54,20 +54,14 @@ class ScheduledTask(models.Model):
         _("run at"),
         null=True,
         blank=True,
-        help_text=_(
-            "One-off: exact UTC datetime to run. "
-            "Mutually exclusive with interval."
-        ),
+        help_text=_("One-off task: the exact UTC datetime to execute. Leave blank for a recurring task."),
     )
     interval = models.CharField(
         _("interval"),
         max_length=100,
         blank=True,
         default="",
-        help_text=_(
-            "Recurring: cron expression (e.g. '0 2 * * *'). "
-            "Mutually exclusive with run_at."
-        ),
+        help_text=_("Recurring task: cron expression (e.g. '0 2 * * *'). Leave blank for a one-off task."),
     )
 
     # Time bounds — enforced server-side by filtering the API response.
