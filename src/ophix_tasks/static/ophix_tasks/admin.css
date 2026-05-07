@@ -1,3 +1,22 @@
+/*
+ * TabularInline for ScheduledTask: suppress the auto-generated "original"
+ * cell that Django renders as the first column for existing objects.
+ * It contains the model __str__ but we show an Edit popup link instead.
+ * The group gets class ophix-tasks-inline from admin.js at runtime.
+ *
+ * Django also sets padding-top: 2em on all td in has_original rows (forms.css:445)
+ * to accommodate the original text sitting above the form fields. Since we
+ * hide that cell, we reset the padding so rows don't have extra top spacing.
+ */
+.ophix-tasks-inline td.original,
+.ophix-tasks-inline th.original {
+    display: none;
+}
+
+.ophix-tasks-inline tr.has_original td {
+    padding-top: 6px !important;
+}
+
 /* Constrain datetime picker inputs to their natural width */
 .vDateField,
 .vTimeField {
