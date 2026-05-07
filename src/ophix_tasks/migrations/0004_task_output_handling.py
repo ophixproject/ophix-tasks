@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("ophix_tasks", "0002_taskexecutionlog"),
+        ("ophix_tasks", "0003_alter_clientscheduleaccess_can_delete_and_more"),
     ]
 
     operations = [
