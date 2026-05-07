@@ -40,15 +40,17 @@ class TaskListView(APIView):
     def get(self, request):
         client = request.user
         now = timezone.now()
+        schedule_name = request.query_params.get("schedule")
 
-        access_qs = list(
-            ClientScheduleAccess.objects.filter(
-                client=client,
-                enabled=True,
-                schedule__enabled=True,
-            ).select_related("schedule")
+        access_filter = ClientScheduleAccess.objects.filter(
+            client=client,
+            enabled=True,
+            schedule__enabled=True,
         )
+        if schedule_name:
+            access_filter = access_filter.filter(schedule__name=schedule_name)
 
+        access_qs = list(access_filter.select_related("schedule"))
         schedule_ids = [a.schedule_id for a in access_qs]
 
         # Include disabled tasks so Tier 2 clients can comment them out.

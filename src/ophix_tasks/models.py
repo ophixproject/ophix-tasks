@@ -179,9 +179,4 @@ class ClientScheduleAccess(ClientArtifactBase):
         return f"{self.client} → {self.schedule.name}"
 
     def save(self, *args, **kwargs):
-        if self.enabled:
-            ClientScheduleAccess.objects.filter(
-                client=self.client,
-                enabled=True,
-            ).exclude(pk=self.pk).update(enabled=False)
         super().save(*args, **kwargs)
