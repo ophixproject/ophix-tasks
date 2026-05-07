@@ -8,6 +8,7 @@ from django.contrib import admin
 from django.conf import settings
 from django import forms
 from django.db import models
+from django.contrib.admin.widgets import AdminSplitDateTime
 from django.utils.html import format_html, mark_safe
 from django.utils.translation import gettext_lazy as _
 
@@ -25,6 +26,7 @@ class ScheduledTaskInline(admin.TabularInline):
     classes = ("collapse",)
     formfield_overrides = {
         models.TextField: {"widget": forms.Textarea(attrs={"rows": 2, "cols": 60})},
+        models.DateTimeField: {"widget": AdminSplitDateTime(attrs={"style": "width: auto;"})},
     }
 
 
@@ -146,6 +148,7 @@ class ScheduledTaskAdmin(admin.ModelAdmin):
     actions = None
     formfield_overrides = {
         models.TextField: {"widget": forms.Textarea(attrs={"rows": 3, "cols": 120})},
+        models.DateTimeField: {"widget": AdminSplitDateTime(attrs={"style": "width: auto;"})},
     }
 
     def command_short(self, obj):
