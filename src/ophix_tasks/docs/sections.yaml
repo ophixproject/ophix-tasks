@@ -1,2 +1,3 @@
-- name: Task Scheduling
-  collapsed: false
+sections:
+  - name: Task Scheduling
+    collapsed: false
