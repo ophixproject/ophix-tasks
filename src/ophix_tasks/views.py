@@ -105,6 +105,7 @@ class TaskListView(APIView):
         existing = ScheduledTask.objects.filter(
             schedule=access.schedule,
             command=data["command"],
+            interval=data.get("interval", ""),
         ).first()
 
         if existing:
