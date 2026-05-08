@@ -69,7 +69,7 @@ class ScheduledTaskInline(admin.TabularInline):
     extra = 0
     show_change_link = False
     ordering = ("name",)
-    fields = ("edit_link", "enabled", "name", "command_col", "timing_col", "output_col")
+    fields = ("edit_link", "enabled", "paused", "name", "command_col", "timing_col", "output_col")
     readonly_fields = ("edit_link", "name", "command_col", "timing_col", "output_col")
     classes = ("collapse",)
 
@@ -116,7 +116,7 @@ class ClientScheduleInlineForClient(admin.TabularInline):
     model = ClientScheduleAccess
     extra = 0
     autocomplete_fields = ("schedule",)
-    fields = ("schedule", "enabled", "can_update", "notes")
+    fields = ("schedule", "enabled", "paused", "can_update", "notes")
     classes = ("collapse",)
     verbose_name = _("Schedule")
     verbose_name_plural = _("Schedules")
@@ -130,7 +130,7 @@ class ClientScheduleInlineForSchedule(admin.TabularInline):
     model = ClientScheduleAccess
     extra = 0
     autocomplete_fields = ("client",)
-    fields = ("client", "enabled", "can_update", "notes")
+    fields = ("client", "enabled", "paused", "can_update", "notes")
     classes = ("collapse",)
     verbose_name = _("Client")
     verbose_name_plural = _("Clients")
@@ -202,8 +202,8 @@ if getattr(settings, "SHOW_SCHEDULERS_MODEL", False):
 
 @admin.register(Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
-    list_display = ("name", "description", "task_count", "enabled", "linked_clients")
-    list_editable = ("enabled",)
+    list_display = ("name", "description", "task_count", "enabled", "paused", "linked_clients")
+    list_editable = ("enabled", "paused")
     list_filter = ("enabled",)
     search_fields = ("name", "description")
     ordering = ("name",)
@@ -249,10 +249,10 @@ class ScheduleAdmin(admin.ModelAdmin):
 class ScheduledTaskAdmin(admin.ModelAdmin):
     list_display = (
         "name", "schedule", "scheduler", "command_short", "description_short",
-        "run_at", "interval", "enabled",
+        "run_at", "interval", "enabled", "paused",
         "stdout_handling", "stderr_handling",
     )
-    list_editable = ("enabled",)
+    list_editable = ("enabled", "paused")
     list_filter = ("schedule", "scheduler", "enabled", TimingTypeFilter, "stdout_handling", "stderr_handling")
     search_fields = ("name", "command", "description", "schedule__name")
     ordering = ("schedule__name", "name")
@@ -260,7 +260,7 @@ class ScheduledTaskAdmin(admin.ModelAdmin):
     actions = None
     fieldsets = [
         (None, {
-            "fields": ["name", "schedule", "scheduler", "enabled", "description", "command"],
+            "fields": ["name", "schedule", "scheduler", "enabled", "paused", "description", "command"],
         }),
         (_("Schedule"), {
             "fields": ["run_at", "interval", "starts_at", "ends_at"],

@@ -92,6 +92,11 @@ class Schedule(models.Model):
     name = models.CharField(_("name"), max_length=100, unique=True)
     description = models.TextField(_("description"), blank=True, default="")
     enabled = models.BooleanField(_("enabled"), default=True)
+    paused = models.BooleanField(
+        _("paused"),
+        default=False,
+        help_text=_("Pause all tasks in this schedule for all clients. Tasks remain visible in responses but are marked paused."),
+    )
     updated_at = models.DateTimeField(_("updated at"), auto_now=True)
 
     class Meta:
@@ -158,6 +163,11 @@ class ScheduledTask(models.Model):
     )
 
     enabled = models.BooleanField(_("enabled"), default=True)
+    paused = models.BooleanField(
+        _("paused"),
+        default=False,
+        help_text=_("Pause this task for all clients. The task remains in responses but is marked paused."),
+    )
 
     stdout_handling = models.CharField(
         _("stdout handling"),
@@ -242,6 +252,11 @@ class ClientScheduleAccess(ClientArtifactBase):
         verbose_name=_("schedule"),
         on_delete=models.CASCADE,
         related_name="client_access",
+    )
+    paused = models.BooleanField(
+        _("paused"),
+        default=False,
+        help_text=_("Pause all tasks in this schedule for this client only. Tasks remain visible in responses but are marked paused."),
     )
 
     class Meta:

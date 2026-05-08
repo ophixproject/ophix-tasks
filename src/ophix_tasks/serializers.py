@@ -5,17 +5,23 @@ from .models import ScheduledTask, STDOUT_CHOICES, STDERR_CHOICES
 class ScheduledTaskSerializer(serializers.ModelSerializer):
     schedule = serializers.CharField(source="schedule.name")
     scheduler = serializers.SerializerMethodField()
+    paused = serializers.SerializerMethodField()
 
     class Meta:
         model = ScheduledTask
         fields = [
             "id", "schedule", "scheduler", "name", "command", "description",
-            "run_at", "interval", "starts_at", "ends_at", "enabled",
+            "run_at", "interval", "starts_at", "ends_at", "enabled", "paused",
             "stdout_handling", "stderr_handling", "log_file",
         ]
 
     def get_scheduler(self, obj):
         return obj.scheduler.name if obj.scheduler_id else None
+
+    def get_paused(self, obj):
+        # The view sets _paused to the effective paused state (task + schedule + access).
+        # Fall back to the task's own paused field if not set by the view.
+        return getattr(obj, "_paused", obj.paused)
 
 
 class TaskCreateSerializer(serializers.Serializer):
