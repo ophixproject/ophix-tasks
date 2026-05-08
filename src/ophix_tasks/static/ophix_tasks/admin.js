@@ -78,12 +78,47 @@
     }
 
     // -----------------------------------------------------------------------
+    // Interval help — ScheduledTask change form.
+    // When a scheduler is selected, replace the interval field help text with
+    // the scheduler's interval_help string (stored as data-interval-help on
+    // each <option> by the SchedulerSelect widget).
+    // -----------------------------------------------------------------------
+    function initIntervalHelp() {
+        var schedulerEl = document.getElementById('id_scheduler');
+        if (!schedulerEl) return;
+
+        var intervalField = document.querySelector('.field-interval');
+        if (!intervalField) return;
+
+        var helpEl = intervalField.querySelector('.help');
+        var defaultText = helpEl ? helpEl.textContent : '';
+
+        // Create a help element if the interval field has none (no static help_text).
+        if (!helpEl) {
+            helpEl = document.createElement('p');
+            helpEl.className = 'help';
+            intervalField.appendChild(helpEl);
+        }
+
+        function update() {
+            var selected = schedulerEl.options[schedulerEl.selectedIndex];
+            var text = selected && selected.dataset.intervalHelp;
+            helpEl.textContent = text || defaultText;
+            helpEl.style.whiteSpace = text ? 'pre-line' : '';
+        }
+
+        schedulerEl.addEventListener('change', update);
+        update();
+    }
+
+    // -----------------------------------------------------------------------
     // Main — locate the group via the formset management input.
     // TabularInline rows are <tr> elements, not .inline-related divs, so
     // class-based selectors used for StackedInline won't work here.
     // id_tasks-TOTAL_FORMS is always present in the Schedule change form.
     // -----------------------------------------------------------------------
     document.addEventListener('DOMContentLoaded', function () {
+        initIntervalHelp();
         var mgmt = document.getElementById('id_tasks-TOTAL_FORMS');
         if (!mgmt) return;
 

@@ -20,6 +20,25 @@ from .models import (
 
 
 # ============================================================
+# Custom widgets
+# ============================================================
+
+class SchedulerSelect(forms.Select):
+    """Select widget that embeds interval_help as a data attribute on each option."""
+    def create_option(self, name, value, label, selected, index, subgroup=None, **kwargs):
+        option = super().create_option(name, value, label, selected, index, subgroup=subgroup, **kwargs)
+        if value:
+            pk = value.value if hasattr(value, "value") else value
+            try:
+                scheduler = Scheduler.objects.get(pk=pk)
+                if scheduler.interval_help:
+                    option["attrs"]["data-interval-help"] = scheduler.interval_help
+            except (Scheduler.DoesNotExist, ValueError, TypeError):
+                pass
+        return option
+
+
+# ============================================================
 # Custom filters
 # ============================================================
 
@@ -257,6 +276,7 @@ class ScheduledTaskAdmin(admin.ModelAdmin):
 
     class Media:
         css = {"all": ("ophix_tasks/admin.css",)}
+        js = ("ophix_tasks/admin.js",)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "scheduler":
@@ -270,6 +290,7 @@ class ScheduledTaskAdmin(admin.ModelAdmin):
                 except ScheduledTask.DoesNotExist:
                     pass
             kwargs["queryset"] = qs
+            kwargs["widget"] = SchedulerSelect
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_form(self, request, obj=None, **kwargs):
