@@ -258,6 +258,20 @@ class ScheduledTaskAdmin(admin.ModelAdmin):
     class Media:
         css = {"all": ("ophix_tasks/admin.css",)}
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "scheduler":
+            qs = Scheduler.objects.filter(enabled=True)
+            obj_id = request.resolver_match.kwargs.get("object_id")
+            if obj_id:
+                try:
+                    current = ScheduledTask.objects.get(pk=obj_id)
+                    if current.scheduler_id:
+                        qs = (qs | Scheduler.objects.filter(pk=current.scheduler_id)).distinct()
+                except ScheduledTask.DoesNotExist:
+                    pass
+            kwargs["queryset"] = qs
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         if not obj:
