@@ -30,7 +30,7 @@ from rest_framework import status
 from ophix.core.auth import ClientTokenAuthentication
 from ophix.core.audit import record_access
 
-from .models import ClientScheduleAccess, Scheduler, ScheduledTask, TaskExecutionLog
+from .models import ClientScheduleAccess, Schedule, Scheduler, ScheduledTask, TaskExecutionLog
 from .serializers import ScheduledTaskSerializer, TaskCreateSerializer
 
 
@@ -77,17 +77,30 @@ class TaskListView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         data = serializer.validated_data
+        schedule_name = data["schedule"]
+        schedule_created = False
 
         try:
             access = ClientScheduleAccess.objects.select_related("schedule").get(
                 client=client,
-                schedule__name=data["schedule"],
+                schedule__name=schedule_name,
                 enabled=True,
                 can_update=True,
                 schedule__enabled=True,
             )
         except ClientScheduleAccess.DoesNotExist:
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            # If the schedule doesn't exist at all, auto-create it and grant access.
+            # If it exists but this client lacks permission, refuse — explicit grant required.
+            if Schedule.objects.filter(name=schedule_name).exists():
+                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            schedule = Schedule.objects.create(name=schedule_name)
+            access = ClientScheduleAccess.objects.create(
+                client=client,
+                schedule=schedule,
+                enabled=True,
+                can_update=True,
+            )
+            schedule_created = True
 
         existing = ScheduledTask.objects.filter(
             schedule=access.schedule,
@@ -124,7 +137,10 @@ class TaskListView(APIView):
         )
 
         record_access(access, "POST")
-        return Response({"status": "created", "id": task.pk}, status=status.HTTP_201_CREATED)
+        return Response(
+            {"status": "created", "id": task.pk, "schedule_created": schedule_created},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class TaskReportView(APIView):
