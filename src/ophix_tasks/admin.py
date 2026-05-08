@@ -25,8 +25,8 @@ from .models import (
 
 class SchedulerSelect(forms.Select):
     """Select widget that embeds interval_help as a data attribute on each option."""
-    def create_option(self, name, value, label, selected, index, subgroup=None, **kwargs):
-        option = super().create_option(name, value, label, selected, index, subgroup=subgroup, **kwargs)
+    def create_option(self, name, value, label, selected, index, **kwargs):
+        option = super().create_option(name, value, label, selected, index, **kwargs)
         if value:
             pk = value.value if hasattr(value, "value") else value
             try:
