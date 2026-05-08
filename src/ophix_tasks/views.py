@@ -4,11 +4,11 @@ ophix_tasks.views
 API views for the Task Scheduling domain plugin.
 
 GET /api/tasks/
-    Returns all tasks for the client's active schedule, including disabled
-    tasks (marked enabled=False) so Tier 2 clients can comment them out
-    rather than silently removing them. Time bounds (starts_at/ends_at)
-    are still enforced server-side. If the schedule or access record is
-    disabled, no tasks are returned.
+    Returns tasks for the client's enabled schedules. Pass ?schedule=name to
+    restrict to one schedule; pass ?scheduler=name to restrict to tasks for a
+    specific scheduler type (e.g. ?scheduler=cron returns only cron tasks).
+    Disabled tasks are included so Tier 2 clients can comment them out.
+    Time bounds (starts_at/ends_at) are enforced server-side.
 
 POST /api/tasks/
     Creates a task in a schedule the client has can_update access to.
@@ -16,8 +16,8 @@ POST /api/tasks/
     Returns {"status": "created"|"skipped", "id": <int>}.
 
 POST /api/tasks/<id>/report/
-    Receives execution output from a Tier 1 client and stores it in
-    TaskExecutionLog. Body: {"output": "<text>"}.
+    Receives execution output and stores it in TaskExecutionLog.
+    Body: {"output": "<text>"}.
 """
 
 from django.db.models import Q
@@ -30,7 +30,7 @@ from rest_framework import status
 from ophix.core.auth import ClientTokenAuthentication
 from ophix.core.audit import record_access
 
-from .models import ClientScheduleAccess, ScheduledTask, TaskExecutionLog
+from .models import ClientScheduleAccess, Scheduler, ScheduledTask, TaskExecutionLog
 from .serializers import ScheduledTaskSerializer, TaskCreateSerializer
 
 
@@ -41,6 +41,7 @@ class TaskListView(APIView):
         client = request.user
         now = timezone.now()
         schedule_name = request.query_params.get("schedule")
+        scheduler_name = request.query_params.get("scheduler")
 
         access_filter = ClientScheduleAccess.objects.filter(
             client=client,
@@ -53,14 +54,15 @@ class TaskListView(APIView):
         access_qs = list(access_filter.select_related("schedule"))
         schedule_ids = [a.schedule_id for a in access_qs]
 
-        # Include disabled tasks so Tier 2 clients can comment them out.
-        # Time bounds and schedule/access enablement are still enforced.
         tasks = ScheduledTask.objects.filter(
             schedule_id__in=schedule_ids,
         ).filter(
             Q(starts_at__isnull=True) | Q(starts_at__lte=now),
             Q(ends_at__isnull=True) | Q(ends_at__gte=now),
-        ).select_related("schedule")
+        ).select_related("schedule", "scheduler")
+
+        if scheduler_name:
+            tasks = tasks.filter(scheduler__name=scheduler_name)
 
         for access in access_qs:
             record_access(access, "GET")
@@ -95,8 +97,20 @@ class TaskListView(APIView):
         if existing:
             return Response({"status": "skipped", "id": existing.pk}, status=status.HTTP_200_OK)
 
+        scheduler = None
+        scheduler_name = data.get("scheduler", "")
+        if scheduler_name:
+            try:
+                scheduler = Scheduler.objects.get(name=scheduler_name)
+            except Scheduler.DoesNotExist:
+                return Response(
+                    {"scheduler": ["Unknown scheduler: {!r}".format(scheduler_name)]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         task = ScheduledTask.objects.create(
             schedule=access.schedule,
+            scheduler=scheduler,
             name=data["name"],
             command=data["command"],
             description=data.get("description", ""),

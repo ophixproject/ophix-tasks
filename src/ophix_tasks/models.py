@@ -3,6 +3,11 @@ ophix_tasks.models
 ~~~~~~~~~~~~~~~~~~
 Domain models for the Ophix Task Scheduling server.
 
+Scheduler
+    A named scheduler type (e.g. "cron", "systemd", "wts"). Stores a
+    validator class reference that is used to validate the interval field
+    on ScheduledTask. Operators can disable schedulers they don't support.
+
 Schedule
     A named collection of tasks. This is the artifact — clients are
     granted access at this level and receive all active tasks within it.
@@ -10,15 +15,15 @@ Schedule
 ScheduledTask
     An individual task entry within a Schedule. Defines what to run
     and when. Exactly one of run_at (one-off) or interval (recurring)
-    must be set. starts_at and ends_at are server-side time bounds —
-    the server omits tasks outside their window from API responses.
+    must be set. The scheduler field identifies the target scheduling
+    system and governs interval format validation.
 
 ClientScheduleAccess
     Join table linking a Client to a Schedule with per-link permission
-    flags inherited from ClientArtifactBase. Only one enabled access
-    record is permitted per client at a time — enabling one automatically
-    disables all others for the same client.
+    flags inherited from ClientArtifactBase.
 """
+
+import importlib
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -28,19 +33,59 @@ from ophix.core.models import ClientArtifactBase
 
 
 STDOUT_CHOICES = [
-    ("inherit", "Default (cron handles output)"),
+    ("inherit", "Default (scheduler handles output)"),
     ("report", "Report to server"),
     ("null", "Discard (/dev/null)"),
     ("file", "Append to log file"),
 ]
 
 STDERR_CHOICES = [
-    ("inherit", "Default (cron handles errors)"),
+    ("inherit", "Default (scheduler handles errors)"),
     ("report", "Report to server"),
     ("null", "Discard (/dev/null)"),
     ("merge", "Merge with stdout (2>&1)"),
     ("file", "Append to log file"),
 ]
+
+
+class Scheduler(models.Model):
+    name = models.CharField(
+        _("name"),
+        max_length=50,
+        unique=True,
+        help_text=_("Internal identifier used by Tier 2 clients (e.g. 'cron', 'systemd', 'wts')."),
+    )
+    label = models.CharField(
+        _("label"),
+        max_length=100,
+        help_text=_("Human-readable name shown in admin (e.g. 'Cron (/etc/cron.d)')."),
+    )
+    interval_help = models.TextField(
+        _("interval help"),
+        blank=True,
+        default="",
+        help_text=_("Documentation shown to operators when setting the interval field."),
+    )
+    validator_class = models.CharField(
+        _("validator class"),
+        max_length=200,
+        blank=True,
+        default="",
+        help_text=_("Dotted Python path to the validator class (e.g. 'ophix_tasks.validators.CronValidator')."),
+    )
+    enabled = models.BooleanField(
+        _("enabled"),
+        default=True,
+        help_text=_("Disabled schedulers cannot be selected on new tasks."),
+    )
+
+    class Meta:
+        ordering = ("name",)
+        verbose_name = _("Scheduler")
+        verbose_name_plural = _("Schedulers")
+
+    def __str__(self):
+        return self.label or self.name
 
 
 class Schedule(models.Model):
@@ -65,13 +110,22 @@ class ScheduledTask(models.Model):
         on_delete=models.CASCADE,
         related_name="tasks",
     )
+    scheduler = models.ForeignKey(
+        Scheduler,
+        verbose_name=_("scheduler"),
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="tasks",
+        help_text=_("Target scheduling system. Determines the expected interval format."),
+    )
     name = models.CharField(_("name"), max_length=200)
     command = models.TextField(_("command"))
     description = models.TextField(
         _("description"),
         blank=True,
         default="",
-        help_text=_("Optional note written as a comment above the cron entry."),
+        help_text=_("Optional note written as a comment in the generated schedule file."),
     )
 
     # Scheduling — exactly one of run_at or interval must be set.
@@ -86,7 +140,7 @@ class ScheduledTask(models.Model):
         max_length=100,
         blank=True,
         default="",
-        help_text=_("Recurring task: cron expression (e.g. '0 2 * * *'). Leave blank for a one-off task."),
+        help_text=_("Recurring task: interval expression for the assigned scheduler. Leave blank for a one-off task."),
     )
 
     # Time bounds — enforced server-side by filtering the API response.
@@ -105,7 +159,6 @@ class ScheduledTask(models.Model):
 
     enabled = models.BooleanField(_("enabled"), default=True)
 
-    # Output handling — server controls where stdout and stderr go.
     stdout_handling = models.CharField(
         _("stdout handling"),
         max_length=10,
@@ -133,6 +186,20 @@ class ScheduledTask(models.Model):
             raise ValidationError(
                 _("Set either 'run at' for a one-off task or 'interval' for a recurring task, not both.")
             )
+        if self.interval and self.scheduler_id:
+            scheduler = self.scheduler
+            if scheduler.validator_class:
+                try:
+                    module_path, class_name = scheduler.validator_class.rsplit(".", 1)
+                    module = importlib.import_module(module_path)
+                    validator_cls = getattr(module, class_name)
+                    validator_cls.validate(self.interval)
+                except ValidationError:
+                    raise
+                except Exception as exc:
+                    raise ValidationError(
+                        _("Interval validation error: {}").format(exc)
+                    )
 
     class Meta:
         ordering = ("schedule__name", "name")
@@ -140,7 +207,7 @@ class ScheduledTask(models.Model):
         verbose_name_plural = _("Scheduled Tasks")
 
     def __str__(self):
-        return f"{self.schedule.name} / {self.name}"
+        return "{} / {}".format(self.schedule.name, self.name)
 
 
 class TaskExecutionLog(models.Model):
@@ -183,7 +250,7 @@ class ClientScheduleAccess(ClientArtifactBase):
         verbose_name_plural = _("Client Schedule Access")
 
     def __str__(self):
-        return f"{self.client} → {self.schedule.name}"
+        return "{} → {}".format(self.client, self.schedule.name)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

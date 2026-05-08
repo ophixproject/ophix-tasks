@@ -1,8 +1,8 @@
 """
 ophix_tasks.admin
 ~~~~~~~~~~~~~~~~~
-Admin registrations for Schedule, ScheduledTask, ClientScheduleAccess,
-and TaskExecutionLog.
+Admin registrations for Scheduler, Schedule, ScheduledTask,
+ClientScheduleAccess, and TaskExecutionLog.
 """
 
 from django.contrib import admin
@@ -14,7 +14,9 @@ from django.urls import reverse
 from django.utils.html import format_html, mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from .models import Schedule, ScheduledTask, ClientScheduleAccess, TaskExecutionLog
+from .models import (
+    Scheduler, Schedule, ScheduledTask, ClientScheduleAccess, TaskExecutionLog,
+)
 
 
 # ============================================================
@@ -149,6 +151,33 @@ linked_schedules.short_description = _("Authorised Schedules")
 
 
 # ============================================================
+# SchedulerAdmin (shown only when SHOW_SCHEDULERS_MODEL is True)
+# ============================================================
+
+if getattr(settings, "SHOW_SCHEDULERS_MODEL", False):
+
+    @admin.register(Scheduler)
+    class SchedulerAdmin(admin.ModelAdmin):
+        list_display = ("name", "label", "enabled", "validator_class")
+        list_editable = ("enabled",)
+        list_filter = ("enabled",)
+        search_fields = ("name", "label")
+        ordering = ("name",)
+        actions = None
+        fieldsets = [
+            (None, {
+                "fields": ["name", "label", "enabled"],
+            }),
+            (_("Interval"), {
+                "fields": ["interval_help", "validator_class"],
+            }),
+        ]
+        formfield_overrides = {
+            models.TextField: {"widget": forms.Textarea(attrs={"rows": 4, "cols": 80})},
+        }
+
+
+# ============================================================
 # ScheduleAdmin
 # ============================================================
 
@@ -200,24 +229,24 @@ class ScheduleAdmin(admin.ModelAdmin):
 @admin.register(ScheduledTask)
 class ScheduledTaskAdmin(admin.ModelAdmin):
     list_display = (
-        "name", "schedule", "command_short", "description_short",
+        "name", "schedule", "scheduler", "command_short", "description_short",
         "run_at", "interval", "enabled",
         "stdout_handling", "stderr_handling",
     )
     list_editable = ("enabled",)
-    list_filter = ("schedule", "enabled", TimingTypeFilter, "stdout_handling", "stderr_handling")
+    list_filter = ("schedule", "scheduler", "enabled", TimingTypeFilter, "stdout_handling", "stderr_handling")
     search_fields = ("name", "command", "description", "schedule__name")
     ordering = ("schedule__name", "name")
     autocomplete_fields = ("schedule",)
     actions = None
     fieldsets = [
         (None, {
-            "fields": ["name", "schedule", "enabled", "description", "command"],
+            "fields": ["name", "schedule", "scheduler", "enabled", "description", "command"],
         }),
-        ("Schedule", {
+        (_("Schedule"), {
             "fields": ["run_at", "interval", "starts_at", "ends_at"],
         }),
-        ("Output handling", {
+        (_("Output handling"), {
             "fields": ["stdout_handling", "stderr_handling", "log_file"],
         }),
     ]
