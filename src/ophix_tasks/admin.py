@@ -92,7 +92,7 @@ class ScheduledTaskInline(admin.TabularInline):
 
     def command_col(self, obj):
         cmd = obj.command
-        return (cmd[:70] + "…") if len(cmd) > 70 else cmd
+        return (cmd[:120] + "…") if len(cmd) > 120 else cmd
     command_col.short_description = _("Command")
 
     def timing_col(self, obj):
@@ -306,7 +306,7 @@ class ScheduledTaskAdmin(admin.ModelAdmin):
 
     def command_short(self, obj):
         cmd = obj.command
-        return (cmd[:60] + "…") if len(cmd) > 60 else cmd
+        return (cmd[:120] + "…") if len(cmd) > 120 else cmd
     command_short.short_description = _("Command")
 
     def description_short(self, obj):

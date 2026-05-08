@@ -17,6 +17,53 @@
     padding-top: 6px !important;
 }
 
+/*
+ * Scheduled Tasks inline: let the command column fill available space.
+ * All other columns stay at their natural (content) width; the command
+ * column gets the remainder via width: 100% on a table that is
+ * table-layout: auto, which means it expands last after others are sized.
+ */
+.ophix-tasks-inline .column-command_col {
+    width: 100%;
+}
+
+.ophix-tasks-inline .column-timing_col,
+.ophix-tasks-inline .column-output_col,
+.ophix-tasks-inline .column-enabled,
+.ophix-tasks-inline .column-name {
+    white-space: nowrap;
+    width: 1%;
+}
+
+/*
+ * ScheduledTask list view: same treatment for the standalone admin list.
+ */
+.app-ophix_tasks.model-scheduledtask .column-command_short {
+    width: 100%;
+}
+
+.app-ophix_tasks.model-scheduledtask .column-name,
+.app-ophix_tasks.model-scheduledtask .column-schedule,
+.app-ophix_tasks.model-scheduledtask .column-scheduler,
+.app-ophix_tasks.model-scheduledtask .column-description_short,
+.app-ophix_tasks.model-scheduledtask .column-run_at,
+.app-ophix_tasks.model-scheduledtask .column-interval,
+.app-ophix_tasks.model-scheduledtask .column-enabled,
+.app-ophix_tasks.model-scheduledtask .column-stdout_handling,
+.app-ophix_tasks.model-scheduledtask .column-stderr_handling {
+    white-space: nowrap;
+    width: 1%;
+}
+
+/*
+ * Widen textareas on the ScheduledTask change form (25% wider than default).
+ */
+.app-ophix_tasks.model-scheduledtask .form-row textarea {
+    width: 125%;
+    max-width: none;
+    box-sizing: content-box;
+}
+
 /* Constrain datetime picker inputs to their natural width */
 .vDateField,
 .vTimeField {
