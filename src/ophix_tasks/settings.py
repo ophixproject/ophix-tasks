@@ -1,4 +1,6 @@
 import os
 
+from ophix.settings.utils import get_bool_env
+
 SERVER_NAME = os.getenv("SERVER_NAME") or "taskserver"
-SHOW_SCHEDULERS_MODEL = os.getenv("SHOW_SCHEDULERS_MODEL", "").lower() in ("1", "true", "yes")
+SHOW_SCHEDULERS_MODEL = get_bool_env("SHOW_SCHEDULERS_MODEL", default=False)
