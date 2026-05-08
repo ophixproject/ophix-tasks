@@ -43,29 +43,39 @@ class TaskListView(APIView):
         schedule_name = request.query_params.get("schedule")
         scheduler_name = request.query_params.get("scheduler")
 
-        access_filter = ClientScheduleAccess.objects.filter(
-            client=client,
-            enabled=True,
-            schedule__enabled=True,
-        )
+        # No enabled filter here — we return tasks for all schedules the client
+        # has an access record for. Tasks belonging to a disabled schedule or
+        # disabled access record are returned with enabled=False so Tier 2 clients
+        # comment them out rather than wiping the block entirely.
+        access_filter = ClientScheduleAccess.objects.filter(client=client)
         if schedule_name:
             access_filter = access_filter.filter(schedule__name=schedule_name)
 
         access_qs = list(access_filter.select_related("schedule"))
-        schedule_ids = [a.schedule_id for a in access_qs]
+        all_schedule_ids = [a.schedule_id for a in access_qs]
+        active_schedule_ids = {
+            a.schedule_id for a in access_qs if a.enabled and a.schedule.enabled
+        }
 
-        tasks = ScheduledTask.objects.filter(
-            schedule_id__in=schedule_ids,
-        ).filter(
-            Q(starts_at__isnull=True) | Q(starts_at__lte=now),
-            Q(ends_at__isnull=True) | Q(ends_at__gte=now),
-        ).select_related("schedule", "scheduler")
+        tasks = list(
+            ScheduledTask.objects.filter(
+                schedule_id__in=all_schedule_ids,
+            ).filter(
+                Q(starts_at__isnull=True) | Q(starts_at__lte=now),
+                Q(ends_at__isnull=True) | Q(ends_at__gte=now),
+            ).select_related("schedule", "scheduler")
+        )
 
         if scheduler_name:
-            tasks = tasks.filter(scheduler__name=scheduler_name)
+            tasks = [t for t in tasks if t.scheduler and t.scheduler.name == scheduler_name]
+
+        for task in tasks:
+            if task.schedule_id not in active_schedule_ids:
+                task.enabled = False
 
         for access in access_qs:
-            record_access(access, "GET")
+            if access.enabled and access.schedule.enabled:
+                record_access(access, "GET")
 
         return Response(ScheduledTaskSerializer(tasks, many=True).data)
 
