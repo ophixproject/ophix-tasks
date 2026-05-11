@@ -139,11 +139,21 @@ The client must have `can_update` access to the Schedule.
 - Comment lines immediately preceding a cron entry are captured as the task `description`
 - The existing cron expression (or `@special` shorthand) is used as the `interval`
 - The `name` is derived from the command basename
-- If a task with the same command already exists in the Schedule, it is skipped
+- Shell output redirections (`> /dev/null 2>&1`, `>> /path/to/file`, etc.) are detected and stripped from the command, with the equivalent `stdout_handling` / `stderr_handling` fields set automatically
+- If a task with the same command and interval already exists in the Schedule, it is skipped
 - The existing ophix-managed sentinel block is skipped automatically
 - Environment variable assignments (`MAILTO=""`, etc.) are skipped
 
 After import, run `task-crontab sync` to apply the tasks back from the server.
+
+#### Use full paths for commands
+
+It is good practice to use absolute paths for all executables in cron entries (`/usr/bin/date` rather than `date`). There are two reasons:
+
+1. **Runtime reliability** — cron runs with a minimal `PATH` that often excludes directories on your interactive shell's path. A command that works at the terminal may fail silently under cron if it is not referenced by its full path.
+2. **Import parsing** — the importer auto-detects cron.d format (which has a username field between the schedule and the command) by checking whether the first word after the schedule looks like a username. A bare command name such as `date` or `curl` that contains no `/` can be misidentified as a username, resulting in a blank command and a server error. Using a full path (`/usr/bin/date`) avoids this ambiguity entirely.
+
+If you encounter a `command may not be blank` error during import, check whether the first token of the command is a bare word — replacing it with its full path will resolve it.
 
 ---
 
