@@ -63,18 +63,35 @@ Task descriptions are written as comment lines immediately above the cron entry.
 
 The cron line is built from the task's `stdout_handling` and `stderr_handling` fields:
 
-| stdout | stderr | Generated command |
-| --- | --- | --- |
-| `inherit` | `inherit` | `command` |
-| `report` | `inherit` | `command \| task-client report <id>` |
-| `report` | `report` or `merge` | `command 2>&1 \| task-client report <id>` |
-| `report` | `null` | `command 2>/dev/null \| task-client report <id>` |
-| `inherit` | `report` | `command 2>&1 1>/dev/null \| task-client report <id>` |
-| `null` | `inherit` | `command > /dev/null` |
-| `file` | `merge` | `command >> /path/to/log 2>&1` |
-| `null` | `null` | `command > /dev/null 2>/dev/null` |
+| stdout | stderr | Generated command | Stream logged |
+| --- | --- | --- | --- |
+| `inherit` | `inherit` | `command` | — |
+| `report` | `inherit` | `command \| task-client report <id> --stream stdout` | stdout |
+| `report` | `report` or `merge` | `command 2>&1 \| task-client report <id> --stream both` | both |
+| `report` | `null` | `command 2>/dev/null \| task-client report <id> --stream stdout` | stdout |
+| `null` | `report` | `command > /dev/null 2>&1 1>/dev/null \| task-client report <id> --stream stderr` | stderr |
+| `null` | `inherit` | `command > /dev/null` | — |
+| `file` | `merge` | `command >> /path/to/log 2>&1` | — |
+| `null` | `null` | `command > /dev/null 2>/dev/null` | — |
 
 `task-client report` reads from stdin and POSTs to the server. Failures are silently ignored.
+
+#### The pipe constraint
+
+`task-client report` receives output via a shell pipe, which carries a single stream. This means:
+
+- When both stdout and stderr go to the reporter, they **must be merged** (`2>&1`) before the pipe — there is no way to deliver them separately through one pipe. Both `stderr=report` and `stderr=merge` produce the same shell construct; the difference is only labelling intent.
+- When stdout and stderr go to **different destinations** (e.g. stdout to a file, stderr to the reporter), each gets its own independent redirect and they remain separate.
+
+#### Non-standard output handling
+
+If the built-in options don't cover your needs, set both fields to `inherit` and write the redirections directly in the command field:
+
+```text
+/opt/myscript.sh 2>/var/log/myscript-errors.log | tee /var/log/myscript.log | task-client report 42 --stream stdout
+```
+
+task-crontab writes the command field verbatim, so any shell construct is valid.
 
 ### One-Off Tasks
 
