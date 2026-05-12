@@ -175,6 +175,9 @@ class TaskReportView(APIView):
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
         output = request.data.get("output", "")
-        TaskExecutionLog.objects.create(task=task, client=client, output=output)
+        stream = request.data.get("stream", "both")
+        if stream not in ("stdout", "stderr", "both"):
+            stream = "both"
+        TaskExecutionLog.objects.create(task=task, client=client, stream=stream, output=output)
 
         return Response({"status": "ok"}, status=status.HTTP_201_CREATED)

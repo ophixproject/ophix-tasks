@@ -220,6 +220,13 @@ class ScheduledTask(models.Model):
         return "{} / {}".format(self.schedule.name, self.name)
 
 
+STREAM_CHOICES = [
+    ("stdout", "stdout only"),
+    ("stderr", "stderr only"),
+    ("both", "stdout + stderr"),
+]
+
+
 class TaskExecutionLog(models.Model):
     task = models.ForeignKey(
         ScheduledTask,
@@ -235,6 +242,13 @@ class TaskExecutionLog(models.Model):
         related_name="+",
     )
     reported_at = models.DateTimeField(_("reported at"), auto_now_add=True)
+    stream = models.CharField(
+        _("stream"),
+        max_length=6,
+        choices=STREAM_CHOICES,
+        default="both",
+        help_text=_("Which output stream(s) were captured."),
+    )
     output = models.TextField(_("output"), blank=True, default="")
 
     class Meta:

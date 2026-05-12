@@ -365,9 +365,10 @@ if getattr(settings, "SHOW_CLIENT_ARTIFACT_MODEL", False):
 
 @admin.register(TaskExecutionLog)
 class TaskExecutionLogAdmin(admin.ModelAdmin):
-    list_display = ("task", "client", "reported_at", "output_short")
+    list_display = ("task", "client", "reported_at", "stream", "output_short")
     list_filter = (
         ("reported_at", admin.DateFieldListFilter),
+        "stream",
         "task__schedule",
         "task",
         "client",
@@ -375,7 +376,7 @@ class TaskExecutionLogAdmin(admin.ModelAdmin):
     search_fields = ("task__name", "client__name", "output")
     ordering = ("-reported_at",)
     date_hierarchy = "reported_at"
-    readonly_fields = ("task", "client", "reported_at", "output")
+    readonly_fields = ("task", "client", "reported_at", "stream", "output")
     actions = None
 
     def output_short(self, obj):
