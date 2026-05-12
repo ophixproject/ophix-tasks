@@ -148,6 +148,38 @@ task-crontab show --format user
 | `--user` | `root` | Unix user to run tasks as (crond format only) |
 | `--format` | auto | `user` or `crond`. Default: auto-detect from UID |
 
+### `install`
+
+Add a bootstrapping sync line to the crontab, remove duplicate entries matching tasks in the schedule, then run an immediate sync. This is the recommended final step after `import`.
+
+```bash
+# Non-root: installs into user crontab
+task-crontab install --schedule my-schedule
+
+# Root: installs into /etc/cron.d/ophix-tasks
+task-crontab install --schedule server-maintenance
+
+# Custom interval and target file
+task-crontab install --schedule my-schedule --interval "*/30 * * * *" --file /etc/cron.d/ophix-www --user www-data
+```
+
+| Argument | Default | Description |
+| --- | --- | --- |
+| `--schedule` | (required) | Schedule name to fetch and install |
+| `--interval` | `*/15 * * * *` | Cron expression for the bootstrapping sync line |
+| `--file` | auto | File to write; omit when non-root to use user crontab |
+| `--user` | `root` | Unix user for the sync line (crond format only) |
+| `--format` | auto | `user` or `crond`. Auto-detected from effective UID. |
+
+The bootstrapping line runs `task-crontab sync` periodically to keep the managed block current. `install` is idempotent — re-running it will not add a second bootstrapping line. Cron entries outside the managed block whose commands match tasks in the nominated schedule are removed to avoid duplicates.
+
+**Recommended workflow after `import`:**
+
+```bash
+task-crontab import --schedule my-schedule   # upload existing entries to server
+task-crontab install --schedule my-schedule  # write managed block + bootstrapping line
+```
+
 ### `clear`
 
 Remove the ophix-managed block from the crontab file.
