@@ -5,8 +5,6 @@ order: 120
 section: Task Scheduling
 ---
 
-# task-crontab Reference
-
 `ophix-task-crontab` is the Tier 2 cron client for the task scheduling domain. It fetches the task list from the task server via `task_client.core` and writes a managed block to a `/etc/cron.d/` file using sentinel comments. The entire block is reconstructed on every sync.
 
 ---
@@ -38,7 +36,7 @@ Override with `--format user` or `--format crond`. In `user` format, `--user` is
 
 task-crontab writes a single contiguous block delimited by sentinel comments:
 
-```
+```text
 # --- BEGIN OPHIX-TASKS (managed by ophix-task-crontab, do not edit) ---
 
 # Nightly backup script
@@ -58,10 +56,10 @@ Files in `/etc/cron.d/` require a username field between the schedule and the co
 
 ### Disabled and Paused Tasks
 
-- **`enabled=False`** — the task is commented out with `# [disabled]`. The cron entry is visible in the file but will not run.
-- **`paused=True`** — the task is commented out with `# [paused]`. Pausing is a temporary suspend; the entry remains visible so you can see what is managed.
+- **`enabled=False`** — the task is not returned by the server. On the next sync, the entry is removed from the crontab entirely. This matches the behaviour of all other Ophix domains.
+- **`paused=True`** — the task is returned by the server but written as a commented-out line with `# [paused]`. The entry is visible so the operator can see that a task has been temporarily suspended.
 
-The name suffix (`# task-name`) is only appended to active lines, not to disabled or paused entries.
+The name suffix (`# task-name`) is only appended to active (non-paused) lines.
 
 ### Output Handling
 
@@ -208,7 +206,7 @@ The server allows a single client to hold access to multiple Schedules simultane
 
 To keep the crontab in sync automatically, add the sync call as a root cron entry outside the managed block:
 
-```
+```text
 # /etc/cron.d/ophix-tasks
 */15 * * * * root /opt/venv/bin/task-crontab sync --schedule server-maintenance
 ```

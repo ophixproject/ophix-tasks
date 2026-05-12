@@ -4,10 +4,12 @@ ophix_tasks.views
 API views for the Task Scheduling domain plugin.
 
 GET /api/tasks/
-    Returns tasks for the client's enabled schedules. Pass ?schedule=name to
+    Returns enabled tasks for the client's enabled schedules. Pass ?schedule=name to
     restrict to one schedule; pass ?scheduler=name to restrict to tasks for a
     specific scheduler type (e.g. ?scheduler=cron returns only cron tasks).
-    Disabled tasks are included so Tier 2 clients can comment them out.
+    Disabled tasks (enabled=False) are excluded — consistent with other domains.
+    Paused tasks (paused=True) are included with paused=True so Tier 2 clients
+    can comment them out rather than silently removing them.
     Time bounds (starts_at/ends_at) are enforced server-side.
 
 POST /api/tasks/
@@ -58,6 +60,7 @@ class TaskListView(APIView):
         tasks = list(
             ScheduledTask.objects.filter(
                 schedule_id__in=schedule_ids,
+                enabled=True,
             ).filter(
                 Q(starts_at__isnull=True) | Q(starts_at__lte=now),
                 Q(ends_at__isnull=True) | Q(ends_at__gte=now),
