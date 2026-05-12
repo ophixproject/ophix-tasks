@@ -76,6 +76,13 @@ The cron line is built from the task's `stdout_handling` and `stderr_handling` f
 
 `task-client report` reads from stdin and POSTs to the server. If stdin is empty, no log entry is created — the report is silently skipped. Pass `--force` to record an entry even when there is no output. Failures are silently ignored.
 
+While `task-client report` is designed to be called from a generated cron line, it is a general-purpose command with no requirement to be used that way. You can call it from any context — a script, a wrapper, or the command line — and pipe any input to it:
+
+```bash
+echo "Manual note: deployed v2.3 at 14:30" | task-client report 42
+some-script.sh 2>&1 | task-client report 42 --stream both
+```
+
 #### The pipe constraint
 
 `task-client report` receives output via a shell pipe, which carries a single stream. This means:
