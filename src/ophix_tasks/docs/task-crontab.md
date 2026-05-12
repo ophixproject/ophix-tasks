@@ -74,7 +74,7 @@ The cron line is built from the task's `stdout_handling` and `stderr_handling` f
 | `file` | `merge` | `command >> /path/to/log 2>&1` | — |
 | `null` | `null` | `command > /dev/null 2>/dev/null` | — |
 
-`task-client report` reads from stdin and POSTs to the server. Failures are silently ignored.
+`task-client report` reads from stdin and POSTs to the server. If stdin is empty, no log entry is created — the report is silently skipped. Pass `--force` to record an entry even when there is no output. Failures are silently ignored.
 
 #### The pipe constraint
 
