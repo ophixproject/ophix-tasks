@@ -23,15 +23,30 @@ pip install ophix-task-crontab
 
 ## How It Works
 
+### Output Format
+
+task-crontab supports two output formats:
+
+| Format | When used | Username field |
+| --- | --- | --- |
+| `crond` | Default when running as root | Yes — `schedule username command` |
+| `user` | Default when running as non-root | No — `schedule command` |
+
+Override with `--format user` or `--format crond`. In `user` format, `--user` is ignored.
+
 ### Managed Block
 
 task-crontab writes a single contiguous block delimited by sentinel comments:
 
 ```
 # --- BEGIN OPHIX-TASKS (managed by ophix-task-crontab, do not edit) ---
+
 # Nightly backup script
 0 2 * * * root /opt/backup.sh | task-client report 1  # nightly-backup
-# [disabled] 30 9 * * * root /opt/cleanup.sh  # disabled-cleanup
+
+# [paused] 30 9 * * * root /opt/report.sh
+
+# [disabled] 0 3 * * * root /opt/cleanup.sh
 # --- END OPHIX-TASKS ---
 ```
 
@@ -39,11 +54,14 @@ On each sync, the existing block is replaced atomically. Content outside the sen
 
 ### cron.d Format
 
-Files in `/etc/cron.d/` require a username field between the schedule and the command. task-crontab uses this format by default (defaulting to `root`). Override with `--user`.
+Files in `/etc/cron.d/` require a username field between the schedule and the command. task-crontab uses this format when running as root (defaulting to `root`). Override with `--user`.
 
-### Disabled Tasks
+### Disabled and Paused Tasks
 
-Tasks with `enabled=False` are written as commented-out lines prefixed with `# [disabled]`. This makes it visible that a task has been suspended rather than silently removing it.
+- **`enabled=False`** — the task is commented out with `# [disabled]`. The cron entry is visible in the file but will not run.
+- **`paused=True`** — the task is commented out with `# [paused]`. Pausing is a temporary suspend; the entry remains visible so you can see what is managed.
+
+The name suffix (`# task-name`) is only appended to active lines, not to disabled or paused entries.
 
 ### Output Handling
 
@@ -72,21 +90,27 @@ Tasks with `run_at` set are converted to a pinned cron expression: `MM HH DD mon
 
 ### `sync`
 
-Fetch tasks and write to the crontab file.
+Fetch tasks and write to the crontab.
 
 ```bash
-task-crontab sync
+# As a non-root user — writes to your user crontab automatically
+task-crontab sync --schedule my-schedule
+
+# As root — writes to /etc/cron.d/ophix-tasks (crond format)
 task-crontab sync --schedule server-maintenance
-task-crontab sync --user www-data --file /etc/cron.d/ophix-www
+
+# Override format or file explicitly
+task-crontab sync --format crond --user www-data --file /etc/cron.d/ophix-www
 ```
 
 | Argument | Default | Description |
 | --- | --- | --- |
 | `--schedule` | (all) | Only fetch tasks from this named Schedule |
-| `--file` | `/etc/cron.d/ophix-tasks` | Crontab file to write |
-| `--user` | `root` | Unix user to run tasks as |
+| `--file` | auto | File to write. When non-root and not specified, writes via `crontab -` |
+| `--user` | `root` | Unix user to run tasks as (crond format only) |
+| `--format` | auto | `user` (no username field) or `crond` (username field). Default: auto-detect from UID |
 
-Requires write permission to the target file. Run as root or via sudo.
+When running as root without `--file`, writes to `/etc/cron.d/ophix-tasks`. When running as non-root without `--file`, reads the user crontab with `crontab -l` and writes it back via `crontab -`.
 
 ### `show`
 
@@ -95,12 +119,14 @@ Print the cron block that would be written, without writing anything. Useful for
 ```bash
 task-crontab show
 task-crontab show --schedule server-maintenance --user www-data
+task-crontab show --format user
 ```
 
 | Argument | Default | Description |
 | --- | --- | --- |
 | `--schedule` | (all) | Only fetch tasks from this named Schedule |
-| `--user` | `root` | Unix user to run tasks as |
+| `--user` | `root` | Unix user to run tasks as (crond format only) |
+| `--format` | auto | `user` or `crond`. Default: auto-detect from UID |
 
 ### `clear`
 

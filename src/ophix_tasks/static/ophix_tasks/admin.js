@@ -112,6 +112,44 @@
     }
 
     // -----------------------------------------------------------------------
+    // Inline checkbox auto-save — enabled/paused toggles in the tasks inline.
+    //
+    // Fires a POST to the toggle endpoint immediately when a checkbox changes,
+    // so the operator does not need to save the whole Schedule form just to
+    // pause or re-enable an individual task.
+    // -----------------------------------------------------------------------
+    function initInlineToggles(group) {
+        var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!csrfInput) return;
+
+        group.addEventListener('change', function (e) {
+            var cb = e.target;
+            if (cb.tagName !== 'INPUT' || cb.type !== 'checkbox') return;
+
+            var nameMatch = cb.name.match(/^tasks-(\d+)-(enabled|paused)$/);
+            if (!nameMatch) return;
+
+            var idx = nameMatch[1];
+            var field = nameMatch[2];
+
+            var idInput = group.querySelector('input[name="tasks-' + idx + '-id"]');
+            if (!idInput || !idInput.value) return;
+
+            var pk = idInput.value;
+            var value = cb.checked ? '1' : '0';
+
+            fetch('/admin/ophix_tasks/scheduledtask/' + pk + '/toggle/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrfInput.value,
+                },
+                body: 'field=' + encodeURIComponent(field) + '&value=' + value,
+            }).catch(function () {});
+        });
+    }
+
+    // -----------------------------------------------------------------------
     // Main — locate the group via the formset management input.
     // TabularInline rows are <tr> elements, not .inline-related divs, so
     // class-based selectors used for StackedInline won't work here.
@@ -127,6 +165,8 @@
 
         // Tag the group so CSS can target it without relying on a generated id
         group.classList.add('ophix-tasks-inline');
+
+        initInlineToggles(group);
 
         // Extract Schedule PK from the URL: /admin/ophix_tasks/schedule/<pk>/change/
         var match = window.location.pathname.match(/\/(\d+)\/change\//);

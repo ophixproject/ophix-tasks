@@ -10,7 +10,8 @@ from django.conf import settings
 from django import forms
 from django.db import models
 from django.contrib.admin.widgets import AdminSplitDateTime
-from django.urls import reverse
+from django.http import JsonResponse
+from django.urls import path, reverse
 from django.utils.html import format_html, mark_safe
 from django.utils.translation import gettext_lazy as _
 
@@ -303,6 +304,29 @@ class ScheduledTaskAdmin(admin.ModelAdmin):
                 except (ValueError, TypeError):
                     pass
         return form
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [
+            path(
+                "<int:pk>/toggle/",
+                self.admin_site.admin_view(self.toggle_view),
+                name="ophix_tasks_scheduledtask_toggle",
+            ),
+        ]
+        return custom + urls
+
+    def toggle_view(self, request, pk):
+        if request.method != "POST":
+            return JsonResponse({"ok": False}, status=405)
+        field = request.POST.get("field")
+        if field not in ("enabled", "paused"):
+            return JsonResponse({"ok": False, "error": "invalid field"}, status=400)
+        value = request.POST.get("value") == "1"
+        updated = ScheduledTask.objects.filter(pk=pk).update(**{field: value})
+        if not updated:
+            return JsonResponse({"ok": False, "error": "not found"}, status=404)
+        return JsonResponse({"ok": True})
 
     def command_short(self, obj):
         cmd = obj.command
