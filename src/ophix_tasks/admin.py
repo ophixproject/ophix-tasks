@@ -366,9 +366,15 @@ if getattr(settings, "SHOW_CLIENT_ARTIFACT_MODEL", False):
 @admin.register(TaskExecutionLog)
 class TaskExecutionLogAdmin(admin.ModelAdmin):
     list_display = ("task", "client", "reported_at", "output_short")
-    list_filter = ("task__schedule", "task", "client")
+    list_filter = (
+        ("reported_at", admin.DateFieldListFilter),
+        "task__schedule",
+        "task",
+        "client",
+    )
     search_fields = ("task__name", "client__name", "output")
     ordering = ("-reported_at",)
+    date_hierarchy = "reported_at"
     readonly_fields = ("task", "client", "reported_at", "output")
     actions = None
 
