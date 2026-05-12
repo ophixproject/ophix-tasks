@@ -254,7 +254,7 @@ class ScheduledTaskAdmin(admin.ModelAdmin):
         "stdout_handling", "stderr_handling",
     )
     list_editable = ("enabled", "paused")
-    list_filter = ("schedule", "scheduler", "enabled", TimingTypeFilter, "stdout_handling", "stderr_handling")
+    list_filter = ("schedule", "scheduler", "enabled", "paused", TimingTypeFilter, "stdout_handling", "stderr_handling")
     search_fields = ("name", "command", "description", "schedule__name")
     ordering = ("schedule__name", "name")
     autocomplete_fields = ("schedule",)
