@@ -40,11 +40,9 @@ task-crontab writes a single contiguous block delimited by sentinel comments:
 # --- BEGIN OPHIX-TASKS (managed by ophix-task-crontab, do not edit) ---
 
 # Nightly backup script
-0 2 * * * root /opt/backup.sh | task-client report 1  # nightly-backup
+0 2 * * * root /opt/backup.sh | task-client report 1
 
 # [paused] 30 9 * * * root /opt/report.sh
-
-# [disabled] 0 3 * * * root /opt/cleanup.sh
 # --- END OPHIX-TASKS ---
 ```
 
@@ -59,7 +57,7 @@ Files in `/etc/cron.d/` require a username field between the schedule and the co
 - **`enabled=False`** — the task is not returned by the server. On the next sync, the entry is removed from the crontab entirely. This matches the behaviour of all other Ophix domains.
 - **`paused=True`** — the task is returned by the server but written as a commented-out line with `# [paused]`. The entry is visible so the operator can see that a task has been temporarily suspended.
 
-The name suffix (`# task-name`) is only appended to active (non-paused) lines.
+Task descriptions are written as comment lines immediately above the cron entry. No name suffix is appended to any line.
 
 ### Output Handling
 
