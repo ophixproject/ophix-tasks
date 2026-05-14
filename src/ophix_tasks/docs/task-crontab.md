@@ -69,7 +69,8 @@ The cron line is built from the task's `stdout_handling` and `stderr_handling` f
 | `report` | `inherit` | `command \| task-client report <id> --stream stdout` | stdout |
 | `report` | `report` or `merge` | `command 2>&1 \| task-client report <id> --stream both` | both |
 | `report` | `null` | `command 2>/dev/null \| task-client report <id> --stream stdout` | stdout |
-| `null` | `report` | `command > /dev/null 2>&1 1>/dev/null \| task-client report <id> --stream stderr` | stderr |
+| `report` | `file` | `command 2>>/path/to/log \| task-client report <id> --stream stdout` | stdout |
+| any | `report` | `command 2>&1 >/dev/null \| task-client report <id> --stream stderr` | stderr |
 | `null` | `inherit` | `command > /dev/null` | — |
 | `file` | `merge` | `command >> /path/to/log 2>&1` | — |
 | `null` | `null` | `command > /dev/null 2>/dev/null` | — |
@@ -85,10 +86,31 @@ some-script.sh 2>&1 | task-client report 42 --stream both
 
 #### The pipe constraint
 
-`task-client report` receives output via a shell pipe, which carries a single stream. This means:
+A shell pipe connects the left process's **stdout** (fd 1) to the right process's stdin. That is the only stream the pipe carries.
 
-- When both stdout and stderr go to the reporter, they **must be merged** (`2>&1`) before the pipe — there is no way to deliver them separately through one pipe. Both `stderr=report` and `stderr=merge` produce the same shell construct; the difference is only labelling intent.
-- When stdout and stderr go to **different destinations** (e.g. stdout to a file, stderr to the reporter), each gets its own independent redirect and they remain separate.
+To get stderr into the pipe you use `2>&1` — "redirect fd 2 to wherever fd 1 currently points." The critical constraint is **ordering**: `2>&1` must appear *before* any explicit stdout redirect, while fd 1 still points at the pipe. Then `>/dev/null` discards stdout, leaving only stderr flowing through the pipe to the reporter:
+
+```bash
+command 2>&1 >/dev/null | task-client report <id>
+#        ^^^^ fires first — stderr joins the pipe
+#                 ^^^^^^^^ fires second — stdout discarded
+```
+
+**Why `stdout=file` cannot be combined with `stderr=report`:** to write stdout to a file you would add `>>logfile`, but that redirects fd 1 to the file *before* `2>&1` fires. When `2>&1` then runs, fd 1 is pointing at the file, so stderr also goes to the file — not the pipe. There is no ordering of plain redirects that simultaneously keeps stdout going to a file and stderr going to the pipe.
+
+A subshell can do it, but produces a construct that cannot be expressed as simple field values:
+
+```bash
+{ command >>logfile; } 2>&1 >/dev/null | task-client report <id>
+```
+
+**Practical alternatives when you hit this:**
+
+- Set both to `report`/`merge` — stdout and stderr arrive interleaved in the reporter log. Usually the right answer.
+- Set `stderr=file` and `stdout=report` — each stream goes to its own destination, separate.
+- Set both to `inherit` and write the full redirect in the command field directly — task-crontab writes the command verbatim, so any shell construct is valid.
+
+Both `stderr=report` and `stderr=merge` produce the same shell construct (`2>&1` before the pipe); the distinction is labelling intent only.
 
 #### Non-standard output handling
 

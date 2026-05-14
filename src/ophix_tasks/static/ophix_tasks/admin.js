@@ -150,6 +150,49 @@
     }
 
     // -----------------------------------------------------------------------
+    // Output handling warning — ScheduledTask change form.
+    // When stdout_handling=file and stderr_handling=report are both selected,
+    // stdout is silently discarded (not written to the log file) due to shell
+    // pipe ordering constraints. Warn the operator before they save.
+    // -----------------------------------------------------------------------
+    function initOutputWarning() {
+        var stdoutEl = document.getElementById('id_stdout_handling');
+        var stderrEl = document.getElementById('id_stderr_handling');
+        if (!stdoutEl || !stderrEl) return;
+
+        var fieldset = stdoutEl.closest('fieldset');
+        if (!fieldset) return;
+
+        var warning = document.createElement('p');
+        warning.className = 'help';
+        warning.style.cssText = 'color: var(--ophix-paused-color, #b45309); font-weight: bold; display: none;';
+        warning.textContent = (
+            'Warning: stdout=file has no effect when stderr=report. ' +
+            'Shell pipe ordering means stdout is always discarded in this combination — ' +
+            'the log file will not be written. ' +
+            'To capture both streams, use stdout=report with stderr=report or merge (interleaved), ' +
+            'or use stderr=file with stdout=report (separate destinations), ' +
+            'or set both to inherit and write the full redirect in the command field.'
+        );
+
+        var logFileField = fieldset.querySelector('.field-log_file');
+        if (logFileField) {
+            logFileField.insertAdjacentElement('afterend', warning);
+        } else {
+            fieldset.appendChild(warning);
+        }
+
+        function update() {
+            var bad = stdoutEl.value === 'file' && stderrEl.value === 'report';
+            warning.style.display = bad ? '' : 'none';
+        }
+
+        stdoutEl.addEventListener('change', update);
+        stderrEl.addEventListener('change', update);
+        update();
+    }
+
+    // -----------------------------------------------------------------------
     // Main — locate the group via the formset management input.
     // TabularInline rows are <tr> elements, not .inline-related divs, so
     // class-based selectors used for StackedInline won't work here.
@@ -157,6 +200,7 @@
     // -----------------------------------------------------------------------
     document.addEventListener('DOMContentLoaded', function () {
         initIntervalHelp();
+        initOutputWarning();
         var mgmt = document.getElementById('id_tasks-TOTAL_FORMS');
         if (!mgmt) return;
 

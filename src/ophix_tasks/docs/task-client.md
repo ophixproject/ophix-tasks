@@ -127,7 +127,7 @@ Read stdin and post it to the server as execution output for the given task. Thi
 0 2 * * * root /opt/backup.sh | task-client report 1
 
 # Generated crontab line (report stderr only):
-0 2 * * * root /opt/backup.sh 2>&1 1>/dev/null | task-client report 1
+0 2 * * * root /opt/backup.sh 2>&1 >/dev/null | task-client report 1
 ```
 
 Failures are silently ignored — the task ran; reporting is best-effort.
