@@ -27,6 +27,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "ophix_tasks" = [
+    "OPHIX_RELEASE_NOTES.md",
     "deploy_templates/**/*",
     "static/**/*",
     "docs/**/*",
