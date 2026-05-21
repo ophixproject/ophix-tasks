@@ -1,6 +1,6 @@
 # Ophix Tasks Release Notes
 
-## Unreleased
+## 2026.05.21.02
 
 - `prune_task_logs` now reads its default retention period from the
   `PRUNE_TASK_LOG_DAYS` setting (configurable in `.env`). Falls back to
