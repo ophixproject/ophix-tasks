@@ -41,6 +41,11 @@ class Command(BaseCommand):
             action="store_true",
             help="Show how many records would be deleted without deleting them.",
         )
+        parser.add_argument(
+            "--quiet",
+            action="store_true",
+            help="Suppress all output. Useful when running from cron.",
+        )
 
     def handle(self, *args, **options):
         from django.conf import settings
@@ -50,6 +55,7 @@ class Command(BaseCommand):
         if days is None:
             days = getattr(settings, "PRUNE_TASK_LOG_DAYS", 90)
         dry_run = options["dry_run"]
+        quiet   = options["quiet"]
 
         cutoff = timezone.now() - timedelta(days=days)
         qs = TaskExecutionLog.objects.filter(reported_at__lt=cutoff)
@@ -63,12 +69,14 @@ class Command(BaseCommand):
             return
 
         if count == 0:
-            self.stdout.write(f"No task execution log records older than {days} days found.")
+            if not quiet:
+                self.stdout.write(f"No task execution log records older than {days} days found.")
             return
 
         qs.delete()
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"Deleted {count} task execution log record(s) older than {days} days."
+        if not quiet:
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Deleted {count} task execution log record(s) older than {days} days."
+                )
             )
-        )
