@@ -258,6 +258,7 @@ class ScheduledTaskAdmin(admin.ModelAdmin):
     search_fields = ("name", "command", "description", "schedule__name")
     ordering = ("schedule__name", "name")
     autocomplete_fields = ("schedule",)
+    save_as = True
     actions = None
     fieldsets = [
         (None, {
