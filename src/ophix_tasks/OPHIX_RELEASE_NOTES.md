@@ -1,6 +1,6 @@
 # Ophix Tasks Release Notes
 
-## Unreleased
+## 2026.05.22.01
 
 - `prune_task_logs` now accepts `--quiet` to suppress all output, making it
   safe to run from cron without generating noise in the mail spool. `--dry-run`
