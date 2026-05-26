@@ -89,5 +89,5 @@ Store execution output reported by `task-client report`. Creates a Task Executio
 ## Docs import
 
 ```bash
-ophix-manage ophix_docs_update --include-app-docs ophix.core,ophix_tasks,ophix_docs,ophix_theme_tools
+ophix-manage update_docs --include-app-docs ophix.core,ophix_tasks,ophix_docs
 ```
