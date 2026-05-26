@@ -9,11 +9,14 @@ Operators define named Schedules containing task definitions. Clients are grante
 ## Installation
 
 ```bash
-pip install ophix-tasks ophix-server-base ophix-docs
+pip install ophix-tasks ophix-docs venv-cmds
 ophix-manage configure_install taskserver
 ophix-manage run_install taskserver
 sudo bash taskserver_sudo_install.sh
 ```
+
+`ophix-docs` and `venv-cmds` are recommended but optional. A theme pack (e.g. `ophix-theme-midnight`) can be added for
+custom branding; the built-in Ophix theme is active on fresh installs by default.
 
 ---
 
