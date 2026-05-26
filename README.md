@@ -1,6 +1,6 @@
 # ophix-tasks
 
-Task scheduling domain plugin for [Ophix Project](https://ophixproject.com) servers.
+Task scheduling domain plugin for [Ophix Project](https://ophix.io) servers.
 
 Operators define named Schedules containing task definitions. Clients are granted access at the Schedule level and receive all active tasks in a single API call. Tier 2 clients apply the task list to the host's native scheduler.
 
