@@ -206,14 +206,14 @@ Set in `.env`. All other behaviour is managed via the admin UI.
 ## Server Setup
 
 ```bash
-pip install ophix-tasks ophix-server-base ophix-docs
+pip install ophix-tasks ophix-docs venv-cmds
 ophix-manage configure_install taskserver
 ophix-manage run_install taskserver
 sudo bash taskserver_sudo_install.sh
 ```
 
-Import docs after installation:
+To reload docs after upgrading:
 
 ```bash
-ophix-manage ophix_docs_update --include-app-docs ophix.core,ophix_tasks,ophix_docs,ophix_theme_tools
+ophix-manage update_docs --include-app-docs ophix.core,ophix_tasks,ophix_docs
 ```
