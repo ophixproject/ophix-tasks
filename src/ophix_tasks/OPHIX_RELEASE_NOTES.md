@@ -1,5 +1,9 @@
 # Ophix Tasks Release Notes
 
+## 2026.05.26.01
+
+- Update inline documentation
+
 ## 2026.05.22.01
 
 - `prune_task_logs` now accepts `--quiet` to suppress all output, making it
