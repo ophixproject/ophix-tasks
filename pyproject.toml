@@ -12,9 +12,29 @@ license = "MIT"
 authors = [
     { name = "Ophix Project" }
 ]
-dependencies = [
-    "ophix-server-base>=2026.05.05.02",
+keywords = ["django", "ophix", "task scheduling", "cron", "fleet management"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: System :: Systems Administration",
 ]
+dependencies = [
+    "ophix-server-base>=2026.05.26.01",
+]
+
+[project.urls]
+Homepage = "https://ophix.io"
+Documentation = "https://github.com/ophixproject/ophix-tasks#readme"
+Source = "https://github.com/ophixproject/ophix-tasks"
 
 [project.entry-points."ophix.plugins"]
 ophix_tasks = "ophix_tasks"
