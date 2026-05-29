@@ -178,6 +178,7 @@ if getattr(settings, "SHOW_SCHEDULERS_MODEL", False):
 
     @admin.register(Scheduler)
     class SchedulerAdmin(admin.ModelAdmin):
+        menu_order = 50
         list_display = ("name", "label", "enabled", "validator_class")
         list_editable = ("enabled",)
         list_filter = ("enabled",)
@@ -203,6 +204,7 @@ if getattr(settings, "SHOW_SCHEDULERS_MODEL", False):
 
 @admin.register(Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
+    menu_order = 100
     list_display = ("name", "description", "task_count", "enabled", "paused", "linked_clients")
     list_editable = ("enabled", "paused")
     list_filter = ("enabled",)
@@ -248,6 +250,7 @@ class ScheduleAdmin(admin.ModelAdmin):
 
 @admin.register(ScheduledTask)
 class ScheduledTaskAdmin(admin.ModelAdmin):
+    menu_order = 200
     list_display = (
         "name", "schedule", "scheduler", "command_short", "description_short",
         "run_at", "interval", "enabled", "paused",
@@ -349,6 +352,7 @@ if getattr(settings, "SHOW_CLIENT_ARTIFACT_MODEL", False):
 
     @admin.register(ClientScheduleAccess)
     class ClientScheduleAccessAdmin(admin.ModelAdmin):
+        menu_order = 400
         list_display = ("client", "schedule", "enabled", "can_update", "short_notes")
         list_editable = ("enabled",)
         list_filter = ("enabled", "client__host", "client", "schedule")
@@ -366,6 +370,7 @@ if getattr(settings, "SHOW_CLIENT_ARTIFACT_MODEL", False):
 
 @admin.register(TaskExecutionLog)
 class TaskExecutionLogAdmin(admin.ModelAdmin):
+    menu_order = 500
     list_display = ("task", "client", "reported_at", "stream", "output_short")
     list_filter = (
         ("reported_at", admin.DateFieldListFilter),

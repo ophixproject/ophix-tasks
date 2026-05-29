@@ -253,8 +253,8 @@ class TaskExecutionLog(models.Model):
 
     class Meta:
         ordering = ("-reported_at",)
-        verbose_name = _("Task Execution Log")
-        verbose_name_plural = _("Task Execution Logs")
+        verbose_name = _("Execution Log")
+        verbose_name_plural = _("Execution Logs")
 
     def __str__(self):
         return "{} @ {}".format(self.task, self.reported_at)
