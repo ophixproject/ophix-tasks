@@ -6,6 +6,7 @@ class OphixTasksConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "ophix_tasks"
     verbose_name = _("Tasks")
+    admin_order = 240
     is_ophix_domain = True
 
     def ready(self):
