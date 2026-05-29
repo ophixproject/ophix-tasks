@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
         migrations.AlterModelOptions(
             name="taskexecutionlog",
             options={
-                "ordering": ["-reported_at"],
+                "ordering": ("-reported_at",),
                 "verbose_name": "Execution Log",
                 "verbose_name_plural": "Execution Logs",
             },
