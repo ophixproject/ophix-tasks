@@ -198,7 +198,39 @@
     // class-based selectors used for StackedInline won't work here.
     // id_tasks-TOTAL_FORMS is always present in the Schedule change form.
     // -----------------------------------------------------------------------
+    // -----------------------------------------------------------------------
+    // Compact toggle — ScheduledTask list view.
+    // Hides non-essential columns; preference persisted in localStorage.
+    // -----------------------------------------------------------------------
+    function initCompactToggle() {
+        var btn = document.getElementById('compact-toggle');
+        if (!btn) return;
+
+        var COMPACT_KEY = 'ophix-tasks-scheduledtask-compact';
+
+        function apply(compact) {
+            if (compact) {
+                document.body.classList.add('compact');
+                btn.textContent = 'Full View';
+                btn.classList.add('active');
+            } else {
+                document.body.classList.remove('compact');
+                btn.textContent = 'Compact';
+                btn.classList.remove('active');
+            }
+        }
+
+        apply(localStorage.getItem(COMPACT_KEY) === '1');
+
+        btn.addEventListener('click', function () {
+            var compact = !document.body.classList.contains('compact');
+            localStorage.setItem(COMPACT_KEY, compact ? '1' : '0');
+            apply(compact);
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
+        initCompactToggle();
         initIntervalHelp();
         initOutputWarning();
         var mgmt = document.getElementById('id_tasks-TOTAL_FORMS');

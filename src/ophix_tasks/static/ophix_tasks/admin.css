@@ -56,6 +56,35 @@
 }
 
 /*
+ * Compact mode — hide non-essential columns on the ScheduledTask list view.
+ * Toggled by the Compact/Full button; preference saved in localStorage.
+ */
+.app-ophix_tasks.model-scheduledtask.compact #result_list th.column-description_short,
+.app-ophix_tasks.model-scheduledtask.compact #result_list td.field-description_short,
+.app-ophix_tasks.model-scheduledtask.compact #result_list th.column-stdout_handling,
+.app-ophix_tasks.model-scheduledtask.compact #result_list td.field-stdout_handling,
+.app-ophix_tasks.model-scheduledtask.compact #result_list th.column-stderr_handling,
+.app-ophix_tasks.model-scheduledtask.compact #result_list td.field-stderr_handling {
+    display: none;
+}
+
+#compact-toggle {
+    background: var(--admin-interface-module-background-color);
+    color: var(--admin-interface-module-text-color, #fff);
+    border: none;
+    border-radius: 4px;
+    padding: 5px 15px;
+    cursor: pointer;
+    font-size: 0.8125rem;
+    font-weight: bold;
+    opacity: 0.7;
+}
+
+#compact-toggle.active {
+    opacity: 1;
+}
+
+/*
  * Widen textareas on the ScheduledTask change form (25% wider than default).
  */
 .app-ophix_tasks.model-scheduledtask .form-row textarea {

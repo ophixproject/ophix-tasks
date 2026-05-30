@@ -1,5 +1,12 @@
 # Ophix Tasks Release Notes
 
+## 2026.05.31.01
+
+- Added Compact/Full toggle button to the Scheduled Tasks list view. Compact mode
+  hides the `description`, `stdout handling`, and `stderr handling` columns to reduce
+  table width on standard desktop screens. Preference is saved in `localStorage` and
+  persists across page loads.
+
 ## 2026.05.30.01
 
 - Added `export_tasks` management command — exports Schedule and ScheduledTask
