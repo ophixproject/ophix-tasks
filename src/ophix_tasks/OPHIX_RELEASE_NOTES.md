@@ -1,5 +1,18 @@
 # Ophix Tasks Release Notes
 
+## 2026.05.30.01
+
+- Added `export_tasks` management command — exports Schedule and ScheduledTask
+  records to JSON. Execution logs are not included. Use `--include-client-links`
+  to also export ClientScheduleAccess join records.
+- Added `import_tasks` management command — imports from an `export_tasks` file.
+  Idempotent (schedules matched by name, tasks matched by name within their
+  schedule). Tasks absent from the file are left untouched — import is additive
+  only. Scheduler types resolved by name (must exist via migrate).
+  `--include-client-links` imports join records including the task-domain
+  `paused` flag. Supports `--dry-run` and `--quiet`.
+- Added inline documentation page "Task Schedule Backup and Migration".
+
 ## 2026.05.26.01
 
 - Update inline documentation
