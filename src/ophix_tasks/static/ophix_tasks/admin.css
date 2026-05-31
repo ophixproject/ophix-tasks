@@ -93,11 +93,6 @@
     box-sizing: content-box;
 }
 
-/* TaskExecutionLog is read-only with no meaningful history — hide the History button */
-.app-ophix_tasks.model-taskexecutionlog .historylink {
-    display: none;
-}
-
 /* Constrain datetime picker inputs to their natural width */
 .vDateField,
 .vTimeField {

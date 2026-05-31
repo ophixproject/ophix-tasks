@@ -389,6 +389,11 @@ class TaskExecutionLogAdmin(admin.ModelAdmin):
         return (obj.output[:80] + "…") if len(obj.output) > 80 else obj.output
     output_short.short_description = _("Output")
 
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['show_history'] = False
+        return super().change_view(request, object_id, form_url, extra_context=extra_context)
+
     def has_add_permission(self, request):
         return False
 
