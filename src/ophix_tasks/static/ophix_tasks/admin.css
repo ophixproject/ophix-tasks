@@ -68,21 +68,6 @@
     display: none;
 }
 
-#compact-toggle {
-    background: var(--admin-interface-module-background-color);
-    color: var(--admin-interface-module-text-color, #fff);
-    border: none;
-    border-radius: 4px;
-    padding: 5px 15px;
-    cursor: pointer;
-    font-size: 0.8125rem;
-    font-weight: bold;
-    opacity: 0.7;
-}
-
-#compact-toggle.active {
-    opacity: 1;
-}
 
 /*
  * Widen textareas on the ScheduledTask change form (25% wider than default).

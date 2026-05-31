@@ -222,7 +222,8 @@
 
         apply(localStorage.getItem(COMPACT_KEY) === '1');
 
-        btn.addEventListener('click', function () {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
             var compact = !document.body.classList.contains('compact');
             localStorage.setItem(COMPACT_KEY, compact ? '1' : '0');
             apply(compact);
