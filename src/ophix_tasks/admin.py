@@ -119,8 +119,8 @@ class ClientScheduleInlineForClient(admin.TabularInline):
     autocomplete_fields = ("schedule",)
     fields = ("schedule", "enabled", "paused", "can_update", "notes")
     classes = ("collapse",)
-    verbose_name = _("schedule")
-    verbose_name_plural = _("schedules")
+    verbose_name = _("Schedule")
+    verbose_name_plural = _("Schedules")
     formfield_overrides = {
         models.TextField: {"widget": forms.Textarea(attrs={"rows": 2, "cols": 120})},
     }
@@ -133,8 +133,8 @@ class ClientScheduleInlineForSchedule(admin.TabularInline):
     autocomplete_fields = ("client",)
     fields = ("client", "enabled", "paused", "can_update", "notes")
     classes = ("collapse",)
-    verbose_name = _("client")
-    verbose_name_plural = _("clients")
+    verbose_name = _("Client")
+    verbose_name_plural = _("Clients")
     formfield_overrides = {
         models.TextField: {"widget": forms.Textarea(attrs={"rows": 2, "cols": 120})},
     }
