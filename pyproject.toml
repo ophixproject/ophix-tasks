@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ophix-tasks"
-version = "2026.06.01.03"
+version = "2026.06.01.04"
 description = "Task Scheduling domain plugin for Ophix Project Servers"
 readme = "README.md"
 requires-python = ">=3.10"
