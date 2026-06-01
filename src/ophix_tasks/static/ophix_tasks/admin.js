@@ -25,7 +25,7 @@
 
         var link = document.createElement('a');
         link.className = 'addlink';
-        link.textContent = 'Add task';
+        link.textContent = 'Add another task';
         link.href = url;
         link.setAttribute('onclick', 'return showRelatedObjectPopup(this);');
 
