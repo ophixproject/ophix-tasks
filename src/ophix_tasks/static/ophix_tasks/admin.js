@@ -212,11 +212,9 @@
             if (compact) {
                 document.body.classList.add('compact');
                 btn.textContent = 'Full View';
-                btn.classList.add('active');
             } else {
                 document.body.classList.remove('compact');
                 btn.textContent = 'Compact';
-                btn.classList.remove('active');
             }
         }
 
