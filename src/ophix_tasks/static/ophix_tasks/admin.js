@@ -27,10 +27,6 @@
         link.className = 'addlink';
         link.textContent = 'Add task';
         link.href = url;
-        link.style.cssText = 'display: inline-block; padding: 0.5em 1em;';
-        // Use the same mechanism as the Edit links — showRelatedObjectPopup returns
-        // false, which prevents both the default navigation and Django's own click
-        // interceptor from double-opening the dialog.
         link.setAttribute('onclick', 'return showRelatedObjectPopup(this);');
 
         // Insert after the .tabular wrapper (where Django normally puts "Add another")
