@@ -31,9 +31,12 @@
 
         // Insert as a proper add-row inside the table so it gets Django's
         // standard grey-bar styling, matching "Add another X" on other inlines.
-        var table = group.querySelector('.tabular table');
-        if (table) {
-            var tbody = table.querySelector('tbody') || table;
+        // Use group.querySelector('table') rather than '.tabular table' because
+        // the collapse class wraps the table inside <details>, breaking the
+        // more specific selector in some Django versions.
+        var table = group.querySelector('table');
+        var tbody = table && (table.querySelector('tbody') || table);
+        if (tbody) {
             var tr = document.createElement('tr');
             tr.className = 'add-row';
             var td = document.createElement('td');
@@ -42,12 +45,7 @@
             tr.appendChild(td);
             tbody.appendChild(tr);
         } else {
-            var tabular = group.querySelector('.tabular');
-            if (tabular) {
-                tabular.insertAdjacentElement('afterend', link);
-            } else {
-                group.appendChild(link);
-            }
+            group.appendChild(link);
         }
     }
 
