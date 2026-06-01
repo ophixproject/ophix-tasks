@@ -29,12 +29,25 @@
         link.href = url;
         link.setAttribute('onclick', 'return showRelatedObjectPopup(this);');
 
-        // Insert after the .tabular wrapper (where Django normally puts "Add another")
-        var tabular = group.querySelector('.tabular');
-        if (tabular) {
-            tabular.insertAdjacentElement('afterend', link);
+        // Insert as a proper add-row inside the table so it gets Django's
+        // standard grey-bar styling, matching "Add another X" on other inlines.
+        var table = group.querySelector('.tabular table');
+        if (table) {
+            var tbody = table.querySelector('tbody') || table;
+            var tr = document.createElement('tr');
+            tr.className = 'add-row';
+            var td = document.createElement('td');
+            td.setAttribute('colspan', '100');
+            td.appendChild(link);
+            tr.appendChild(td);
+            tbody.appendChild(tr);
         } else {
-            group.appendChild(link);
+            var tabular = group.querySelector('.tabular');
+            if (tabular) {
+                tabular.insertAdjacentElement('afterend', link);
+            } else {
+                group.appendChild(link);
+            }
         }
     }
 
