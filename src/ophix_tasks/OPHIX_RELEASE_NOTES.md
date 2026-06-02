@@ -1,6 +1,6 @@
 # Ophix Tasks Release Notes
 
-## Unreleased
+## 2026.06.02.01
 
 - `TaskExecutionLogAdmin` now applies `DeleteRedirectToChangelistMixin` — deleting an execution log entry returns to the log list instead of the admin home page.
 
