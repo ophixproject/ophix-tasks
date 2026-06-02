@@ -1,5 +1,9 @@
 # Ophix Tasks Release Notes
 
+## Unreleased
+
+- `TaskExecutionLogAdmin` now applies `DeleteRedirectToChangelistMixin` — deleting an execution log entry returns to the log list instead of the admin home page.
+
 ## 2026.05.31.01
 
 - Added Compact/Full toggle button to the Scheduled Tasks list view. Compact mode

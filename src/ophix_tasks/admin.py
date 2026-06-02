@@ -15,6 +15,7 @@ from django.urls import path, reverse
 from django.utils.html import format_html, mark_safe
 from django.utils.translation import gettext_lazy as _
 
+from ophix.core.admin import DeleteRedirectToChangelistMixin
 from .models import (
     Scheduler, Schedule, ScheduledTask, ClientScheduleAccess, TaskExecutionLog,
 )
@@ -369,7 +370,7 @@ if getattr(settings, "SHOW_CLIENT_ARTIFACT_MODEL", False):
 # ============================================================
 
 @admin.register(TaskExecutionLog)
-class TaskExecutionLogAdmin(admin.ModelAdmin):
+class TaskExecutionLogAdmin(DeleteRedirectToChangelistMixin, admin.ModelAdmin):
     menu_order = 500
     list_display = ("task", "client", "reported_at", "stream", "output_short")
     list_filter = (
