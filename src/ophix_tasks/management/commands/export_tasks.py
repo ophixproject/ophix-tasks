@@ -29,6 +29,30 @@ from pathlib import Path
 from django.core.management.base import BaseCommand, CommandError
 
 
+def _build_meta(domain: str, command: str) -> dict:
+    import datetime
+    import os
+    import pwd
+    import socket
+    from django.conf import settings
+    try:
+        run_by = pwd.getpwuid(os.getuid()).pw_name
+    except Exception:
+        run_by = os.environ.get("USER") or os.environ.get("LOGNAME")
+    ssh_raw = os.environ.get("SSH_CLIENT", "")
+    return {
+        "created_at":     datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "server_name":    getattr(settings, "SERVER_NAME", None),
+        "server_version": getattr(settings, "SERVER_VERSION", None),
+        "hostname":       socket.gethostname(),
+        "domain":         domain,
+        "command":        command,
+        "run_by":         run_by,
+        "login_user":     os.environ.get("SUDO_USER") or None,
+        "ssh_origin":     ssh_raw.split()[0] if ssh_raw else None,
+    }
+
+
 def _serialize_task(task):
     return {
         "name":            task.name,
@@ -132,6 +156,7 @@ class Command(BaseCommand):
 
         payload = {
             "version":              1,
+            "meta":                 _build_meta("tasks", "export_tasks"),
             "include_client_links": include_links,
             "schedules":            [
                 _serialize_schedule(s, include_links) for s in schedules

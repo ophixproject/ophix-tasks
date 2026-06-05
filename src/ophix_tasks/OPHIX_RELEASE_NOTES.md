@@ -1,5 +1,9 @@
 # Ophix Tasks Release Notes
 
+## 2026.06.05.01
+
+- `export_tasks`: export file now includes a `meta` block with `created_at`, `server_name`, `server_version`, `hostname`, `domain`, `command`, `run_by`, `login_user`, and `ssh_origin`.
+
 ## 2026.06.02.01
 
 - `TaskExecutionLogAdmin` now applies `DeleteRedirectToChangelistMixin` — deleting an execution log entry returns to the log list instead of the admin home page.
