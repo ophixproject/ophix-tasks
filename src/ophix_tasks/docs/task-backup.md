@@ -116,17 +116,19 @@ Scheduler types (`cron`, `systemd`, `wts`, etc.) are installed by data migration
 
 ## Full task server restore workflow
 
+> **Note:** Always use single quotes around passphrases in bash. Double-quoted strings allow bash to interpret `!` as a history event, which corrupts a passphrase containing an exclamation mark.
+
 ```bash
 # 1. Export from the source server
 ophix-manage export_hosts --output-file hosts.json
-ophix-manage export_clients --output-file clients.json --passphrase "client-passphrase"
+ophix-manage export_clients --output-file clients.json --passphrase 'client-passphrase'
 ophix-manage export_tasks --output-file tasks.json --include-client-links
 
 # 2. Transfer all three files to the target server
 
 # 3. Import on the target server in dependency order
 ophix-manage import_hosts --input-file hosts.json
-ophix-manage import_clients --input-file clients.json --passphrase "client-passphrase"
+ophix-manage import_clients --input-file clients.json --passphrase 'client-passphrase'
 ophix-manage import_tasks --input-file tasks.json --include-client-links
 ```
 
