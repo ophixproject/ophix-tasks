@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('ophix_core', '0013_category_label_update'),
+        ('ophix_core', '0001_initial'),
     ]
 
     operations = [
