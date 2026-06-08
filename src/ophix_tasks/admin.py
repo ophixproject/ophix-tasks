@@ -15,7 +15,7 @@ from django.urls import path, reverse
 from django.utils.html import format_html, mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from ophix.core.admin import DeleteRedirectToChangelistMixin
+from ophix.core.admin import CleanSaveMessageMixin, DeleteRedirectToChangelistMixin
 from .models import (
     Scheduler, Schedule, ScheduledTask, ClientScheduleAccess, TaskExecutionLog,
 )
@@ -178,7 +178,7 @@ linked_schedules.short_description = _("Authorised Schedules")
 if getattr(settings, "SHOW_SCHEDULERS_MODEL", False):
 
     @admin.register(Scheduler)
-    class SchedulerAdmin(admin.ModelAdmin):
+    class SchedulerAdmin(CleanSaveMessageMixin, admin.ModelAdmin):
         menu_order = 50
         list_display = ("name", "label", "enabled", "validator_class")
         list_editable = ("enabled",)
@@ -204,7 +204,7 @@ if getattr(settings, "SHOW_SCHEDULERS_MODEL", False):
 # ============================================================
 
 @admin.register(Schedule)
-class ScheduleAdmin(admin.ModelAdmin):
+class ScheduleAdmin(CleanSaveMessageMixin, admin.ModelAdmin):
     menu_order = 100
     list_display = ("name", "description", "task_count", "enabled", "paused", "linked_clients")
     list_editable = ("enabled", "paused")
@@ -250,7 +250,7 @@ class ScheduleAdmin(admin.ModelAdmin):
 # ============================================================
 
 @admin.register(ScheduledTask)
-class ScheduledTaskAdmin(admin.ModelAdmin):
+class ScheduledTaskAdmin(CleanSaveMessageMixin, admin.ModelAdmin):
     menu_order = 200
     list_display = (
         "name", "schedule", "scheduler", "command_short", "description_short",
@@ -352,7 +352,7 @@ class ScheduledTaskAdmin(admin.ModelAdmin):
 if getattr(settings, "SHOW_CLIENT_ARTIFACT_MODEL", False):
 
     @admin.register(ClientScheduleAccess)
-    class ClientScheduleAccessAdmin(admin.ModelAdmin):
+    class ClientScheduleAccessAdmin(CleanSaveMessageMixin, admin.ModelAdmin):
         menu_order = 400
         list_display = ("client", "schedule", "enabled", "can_update", "short_notes")
         list_editable = ("enabled",)
