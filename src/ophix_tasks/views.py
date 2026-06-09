@@ -64,6 +64,7 @@ class TaskListView(APIView):
             ).filter(
                 Q(starts_at__isnull=True) | Q(starts_at__lte=now),
                 Q(ends_at__isnull=True) | Q(ends_at__gte=now),
+                Q(run_at__isnull=True) | Q(run_at__gte=now),
             ).select_related("schedule", "scheduler")
         )
 
