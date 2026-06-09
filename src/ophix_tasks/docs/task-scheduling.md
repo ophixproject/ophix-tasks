@@ -25,8 +25,16 @@ A **Scheduled Task** is one entry within a Schedule. It defines what to run and 
 
 | Field | Description |
 | --- | --- |
-| `run_at` | One-off: the exact date and time to execute (server timezone) |
+| `run_at` | One-off: the exact date and time to execute |
 | `interval` | Recurring: a standard cron expression, e.g. `0 2 * * *` |
+
+**Timezone consistency:** The admin displays `run_at` values in the timezone configured by `TIME_ZONE` in the server's `.env`. Cron expressions in `interval` are interpreted by the cron daemon on the client host using the **client OS timezone**. These two must be consistent:
+
+- If the server `TIME_ZONE` is `UTC` and the client OS is UTC, all times align naturally.
+- If both are set to the same local timezone (e.g. `Australia/Sydney`), they also align.
+- Mismatching them (server in UTC, client OS in local time, or vice versa) will cause tasks to fire at unexpected times.
+
+UTC is the recommended setting for operators managing fleets across multiple timezones — set `TIME_ZONE=UTC` in `.env` and keep all client hosts at UTC. Single-timezone operators may use local time throughout, provided both the server `TIME_ZONE` and all client host OS timezones are set identically.
 
 **Time bounds:** Optional server-side window filters:
 

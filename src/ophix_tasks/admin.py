@@ -13,6 +13,7 @@ from django.contrib.admin.widgets import AdminSplitDateTime
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import path, reverse
 from django.utils.html import format_html, mark_safe
+from django.utils.timezone import localtime
 from django.utils.translation import gettext_lazy as _
 
 from ophix.core.admin import CleanSaveMessageMixin, DeleteRedirectToChangelistMixin
@@ -99,7 +100,7 @@ class ScheduledTaskInline(admin.TabularInline):
 
     def timing_col(self, obj):
         if obj.run_at:
-            return "once at {}".format(obj.run_at.strftime("%Y-%m-%d %H:%M"))
+            return "once at {}".format(localtime(obj.run_at).strftime("%Y-%m-%d %H:%M"))
         return obj.interval or "—"
     timing_col.short_description = _("Timing")
 
