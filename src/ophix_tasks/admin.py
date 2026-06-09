@@ -341,6 +341,8 @@ class ScheduledTaskAdmin(CleanSaveMessageMixin, admin.ModelAdmin):
         return custom + urls
 
     def duplicate_view(self, request, pk):
+        from django.contrib import messages
+        messages.info(request, _("This is a copy of an existing task — edit the record, then save to create it."))
         add_url = reverse("admin:ophix_tasks_scheduledtask_add")
         return HttpResponseRedirect(f"{add_url}?_duplicate_from={pk}")
 
