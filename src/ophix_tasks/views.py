@@ -22,6 +22,8 @@ POST /api/tasks/<id>/report/
     Body: {"output": "<text>"}.
 """
 
+from datetime import timedelta
+
 from django.db.models import Q
 from django.utils import timezone
 
@@ -64,7 +66,7 @@ class TaskListView(APIView):
             ).filter(
                 Q(starts_at__isnull=True) | Q(starts_at__lte=now),
                 Q(ends_at__isnull=True) | Q(ends_at__gte=now),
-                Q(run_at__isnull=True) | Q(run_at__gte=now),
+                Q(run_at__isnull=True) | Q(run_at__gte=now, run_at__lte=now + timedelta(days=365)),
             ).select_related("schedule", "scheduler")
         )
 
