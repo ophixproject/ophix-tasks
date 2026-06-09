@@ -10,7 +10,7 @@ from django.conf import settings
 from django import forms
 from django.db import models
 from django.contrib.admin.widgets import AdminSplitDateTime
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import path, reverse
 from django.utils.html import format_html, mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -262,7 +262,6 @@ class ScheduledTaskAdmin(CleanSaveMessageMixin, admin.ModelAdmin):
     search_fields = ("name", "command", "description", "schedule__name")
     ordering = ("schedule__name", "name")
     autocomplete_fields = ("schedule",)
-    save_as = True
     actions = None
     fieldsets = [
         (None, {
@@ -299,16 +298,31 @@ class ScheduledTaskAdmin(CleanSaveMessageMixin, admin.ModelAdmin):
             kwargs["widget"] = SchedulerSelect
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-        if not obj:
-            schedule_id = request.GET.get("schedule")
-            if schedule_id:
-                try:
-                    form.base_fields["schedule"].initial = int(schedule_id)
-                except (ValueError, TypeError):
-                    pass
-        return form
+    def get_changeform_initial_data(self, request):
+        initial = super().get_changeform_initial_data(request)
+        dup_pk = request.GET.get("_duplicate_from")
+        if dup_pk:
+            try:
+                src = ScheduledTask.objects.get(pk=int(dup_pk))
+                initial.update({
+                    "schedule": src.schedule_id,
+                    "scheduler": src.scheduler_id,
+                    "name": src.name,
+                    "command": src.command,
+                    "description": src.description,
+                    "interval": src.interval,
+                    "run_at": src.run_at,
+                    "starts_at": src.starts_at,
+                    "ends_at": src.ends_at,
+                    "enabled": src.enabled,
+                    "paused": src.paused,
+                    "stdout_handling": src.stdout_handling,
+                    "stderr_handling": src.stderr_handling,
+                    "log_file": src.log_file,
+                })
+            except (ScheduledTask.DoesNotExist, ValueError, TypeError):
+                pass
+        return initial
 
     def get_urls(self):
         urls = super().get_urls()
@@ -318,8 +332,17 @@ class ScheduledTaskAdmin(CleanSaveMessageMixin, admin.ModelAdmin):
                 self.admin_site.admin_view(self.toggle_view),
                 name="ophix_tasks_scheduledtask_toggle",
             ),
+            path(
+                "<int:pk>/duplicate/",
+                self.admin_site.admin_view(self.duplicate_view),
+                name="ophix_tasks_scheduledtask_duplicate",
+            ),
         ]
         return custom + urls
+
+    def duplicate_view(self, request, pk):
+        add_url = reverse("admin:ophix_tasks_scheduledtask_add")
+        return HttpResponseRedirect(f"{add_url}?_duplicate_from={pk}")
 
     def toggle_view(self, request, pk):
         if request.method != "POST":
