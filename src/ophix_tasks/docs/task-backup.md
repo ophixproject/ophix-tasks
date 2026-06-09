@@ -121,15 +121,29 @@ Scheduler types (`cron`, `systemd`, `wts`, etc.) are installed by data migration
 ```bash
 # 1. Export from the source server
 ophix-manage export_hosts --output-file hosts.json
-ophix-manage export_clients --output-file clients.json --passphrase 'client-passphrase'
+ophix-manage export_clients --output-file clients.json
 ophix-manage export_tasks --output-file tasks.json --include-client-links
 
 # 2. Transfer all three files to the target server
 
 # 3. Import on the target server in dependency order
 ophix-manage import_hosts --input-file hosts.json
-ophix-manage import_clients --input-file clients.json --passphrase 'client-passphrase'
+ophix-manage import_clients --input-file clients.json
 ophix-manage import_tasks --input-file tasks.json --include-client-links
 ```
 
 Fleet clients can reconnect and retrieve their schedules immediately after the restore without re-registering or re-linking.
+
+---
+
+## Scheduled backups
+
+`ophix-manage create_backup_script` generates `ophix-backup.sh` — a cron-ready wrapper that reads `BACKUP_TARGETS` and `BACKUP_TARGETS_ENCRYPTED` from `.env` and runs the corresponding export commands.
+
+Add to `.env` to include task schedules in the scheduled backup:
+
+```ini
+BACKUP_TARGETS=hosts,clients,settings,tasks
+```
+
+Task data contains no secrets. Client links are included automatically when `BACKUP_INCLUDE_CLIENT_LINKS=true` (the default).
