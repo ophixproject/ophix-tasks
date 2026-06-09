@@ -66,12 +66,23 @@ class TaskListView(APIView):
             ).filter(
                 Q(starts_at__isnull=True) | Q(starts_at__lte=now),
                 Q(ends_at__isnull=True) | Q(ends_at__gte=now),
-                Q(run_at__isnull=True) | Q(run_at__gte=now, run_at__lte=now + timedelta(days=365)),
+                Q(run_at__isnull=True) | Q(run_at__gte=now),
             ).select_related("schedule", "scheduler")
         )
 
         if scheduler_name:
             tasks = [t for t in tasks if t.scheduler and t.scheduler.name == scheduler_name]
+
+        # Cron expressions have no year field — a run_at more than 1 year away
+        # would fire prematurely this year. Withhold until within the window.
+        # systemd and wts both support year-qualified dates so no cap is needed.
+        one_year_ahead = now + timedelta(days=365)
+        tasks = [
+            t for t in tasks
+            if t.run_at is None
+            or t.run_at <= one_year_ahead
+            or (t.scheduler is not None and t.scheduler.name != "cron")
+        ]
 
         for task in tasks:
             task._paused = task.paused or task.schedule_id in paused_schedule_ids
