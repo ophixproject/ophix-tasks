@@ -62,6 +62,14 @@ class Command(BaseCommand):
             action="store_true",
             help="Suppress per-record output. Summary line is always shown.",
         )
+        parser.add_argument(
+            "--name",
+            metavar="NAME",
+            action="append",
+            dest="names",
+            default=None,
+            help="Only import schedule(s) with this name. Repeat to specify multiple names.",
+        )
 
     def handle(self, *args, **options):
         from ophix_tasks.models import Schedule, ScheduledTask, ClientScheduleAccess, Scheduler
@@ -70,6 +78,7 @@ class Command(BaseCommand):
         import_links = options["include_client_links"]
         dry_run      = options["dry_run"]
         quiet        = options["quiet"]
+        names        = options["names"]
 
         if not input_path.exists():
             raise CommandError(f"Input file not found: {input_path}")
@@ -85,6 +94,14 @@ class Command(BaseCommand):
         records = payload["schedules"]
         if not isinstance(records, list):
             raise CommandError("Expected 'schedules' to be a JSON array.")
+
+        if names:
+            names_set = set(names)
+            records = [r for r in records if (r.get("name") or "").strip() in names_set]
+            if not records:
+                raise CommandError(
+                    f"No records found matching --name filter: {', '.join(sorted(names_set))}"
+                )
 
         # Pre-load all known schedulers to avoid per-record DB hits.
         schedulers = {s.name: s for s in Scheduler.objects.all()}
