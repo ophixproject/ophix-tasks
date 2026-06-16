@@ -209,7 +209,7 @@ class ScheduleAdmin(CleanSaveMessageMixin, admin.ModelAdmin):
     menu_order = 100
     list_display = ("name", "description", "task_count", "enabled", "paused", "linked_clients")
     list_editable = ("enabled", "paused")
-    list_filter = ("enabled",)
+    list_filter = ("enabled", "paused")
     search_fields = ("name", "description")
     ordering = ("name",)
     readonly_fields = ("updated_at",)
