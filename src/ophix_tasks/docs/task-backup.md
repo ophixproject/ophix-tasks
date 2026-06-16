@@ -146,4 +146,4 @@ Add to `.env` to include task schedules in the scheduled backup:
 BACKUP_TARGETS=hosts,clients,settings,tasks
 ```
 
-Task data contains no secrets. Client links are included automatically when `BACKUP_INCLUDE_CLIENT_LINKS=true` (the default).
+Task data contains no secrets. Client links are included automatically when `BACKUP_INCLUDE_CLIENT_LINKS=True` (the default).
