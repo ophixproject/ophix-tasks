@@ -17,6 +17,7 @@ from django.utils.timezone import localtime
 from django.utils.translation import gettext_lazy as _
 
 from ophix.core.admin import CleanSaveMessageMixin, DeleteRedirectToChangelistMixin
+from admin_interface.widgets import Select2Widget
 from .models import (
     Scheduler, Schedule, ScheduledTask, ClientScheduleAccess, TaskExecutionLog,
 )
@@ -285,6 +286,9 @@ class ScheduledTaskAdmin(CleanSaveMessageMixin, admin.ModelAdmin):
         js = ("ophix_tasks/admin.js",)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        kwargs["can_add_related"] = False
+        kwargs["can_change_related"] = False
+        kwargs["can_view_related"] = False
         if db_field.name == "scheduler":
             qs = Scheduler.objects.filter(enabled=True)
             obj_id = request.resolver_match.kwargs.get("object_id")
@@ -298,6 +302,10 @@ class ScheduledTaskAdmin(CleanSaveMessageMixin, admin.ModelAdmin):
             kwargs["queryset"] = qs
             kwargs["widget"] = SchedulerSelect
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def formfield_for_choice_field(self, db_field, request, **kwargs):
+        kwargs.setdefault("widget", Select2Widget)
+        return super().formfield_for_choice_field(db_field, request, **kwargs)
 
     def get_changeform_initial_data(self, request):
         initial = super().get_changeform_initial_data(request)
