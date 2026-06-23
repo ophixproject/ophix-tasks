@@ -285,10 +285,17 @@ class ScheduledTaskAdmin(CleanSaveMessageMixin, admin.ModelAdmin):
         css = {"all": ("ophix_tasks/admin.css",)}
         js = ("ophix_tasks/admin.js",)
 
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        if isinstance(getattr(formfield, "widget", None), RelatedFieldWidgetWrapper):
+            formfield.widget.can_add_related = False
+            formfield.widget.can_change_related = False
+            formfield.widget.can_delete_related = False
+            formfield.widget.can_view_related = False
+        return formfield
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        kwargs["can_add_related"] = False
-        kwargs["can_change_related"] = False
-        kwargs["can_view_related"] = False
         if db_field.name == "scheduler":
             qs = Scheduler.objects.filter(enabled=True)
             obj_id = request.resolver_match.kwargs.get("object_id")
