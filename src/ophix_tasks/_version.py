@@ -1,2 +1,2 @@
-__version__ = "2026.06.17.01"
+__version__ = "2026.06.23.01"
 __package_name__ = "ophix-tasks"
