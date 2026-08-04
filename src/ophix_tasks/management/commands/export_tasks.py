@@ -85,7 +85,9 @@ def _serialize_schedule(schedule, include_links=False):
 
     if include_links:
         links = []
-        for link in schedule.client_access.select_related("client__host").all():
+        for link in schedule.client_access.select_related("client__host").order_by(
+            "client__host__name", "client__name"
+        ):
             links.append({
                 "client":     link.client.name,
                 "host":       link.client.host.name,
@@ -122,6 +124,12 @@ class Command(BaseCommand):
             help="Show how many schedules would be exported without writing anything.",
         )
         parser.add_argument(
+            "--stable",
+            action="store_true",
+            help="Omit the meta block and sort keys, so re-exporting unchanged data "
+                 "produces byte-identical output (used by ophix-revisions).",
+        )
+        parser.add_argument(
             "--quiet",
             action="store_true",
             help="Suppress all output.",
@@ -133,6 +141,7 @@ class Command(BaseCommand):
         output_path   = Path(options["output_file"])
         include_links = options["include_client_links"]
         dry_run       = options["dry_run"]
+        stable        = options["stable"]
         quiet         = options["quiet"]
 
         schedules = list(Schedule.objects.order_by("name"))
@@ -154,17 +163,16 @@ class Command(BaseCommand):
         if not output_path.parent.exists():
             raise CommandError(f"Output directory does not exist: {output_path.parent}")
 
-        payload = {
-            "version":              1,
-            "meta":                 _build_meta("tasks", "export_tasks"),
-            "include_client_links": include_links,
-            "schedules":            [
-                _serialize_schedule(s, include_links) for s in schedules
-            ],
-        }
+        payload = {"version": 1}
+        if not stable:
+            payload["meta"] = _build_meta("tasks", "export_tasks")
+        payload["include_client_links"] = include_links
+        payload["schedules"] = [
+            _serialize_schedule(s, include_links) for s in schedules
+        ]
 
         with output_path.open("w", encoding="utf-8") as f:
-            json.dump(payload, f, indent=2)
+            json.dump(payload, f, indent=2, sort_keys=stable)
 
         if not quiet:
             link_note = ", with client links" if include_links else ""

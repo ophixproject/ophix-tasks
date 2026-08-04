@@ -1,5 +1,14 @@
 # Ophix Tasks Release Notes
 
+## Unreleased
+
+- `export_tasks` gains a `--stable` flag: omits the `meta` block and passes `sort_keys=True`,
+  so re-exporting unchanged data produces byte-identical output. Written for
+  `ophix-revisions`.
+- Fixed a latent nondeterminism bug in `--include-client-links`: the nested
+  `client_access` join query had no explicit `.order_by()`. Now ordered by
+  `client__host__name, client__name`.
+
 ## 2026.06.09.04
 
 - Fixed `export_clients --passphrase` shown in the restore workflow — client tokens are
