@@ -8,3 +8,18 @@ def install_configure(conf, command):
     """configure_install hook: contribute this domain's backup target."""
     existing = conf.get("backup", "targets_extra", fallback="")
     conf.set("backup", "targets_extra", ",".join(filter(None, [existing, "tasks"])))
+
+
+def get_revisions_targets():
+    """
+    Optional hook discovered by ophix-revisions (if installed).
+    """
+    return [
+        {
+            "name": "tasks",
+            "app_label": "ophix_tasks",
+            "export_command": "export_tasks",
+            "encrypted": False,
+            "stable": True,
+        },
+    ]

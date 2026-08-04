@@ -8,6 +8,9 @@
 - Fixed a latent nondeterminism bug in `--include-client-links`: the nested
   `client_access` join query had no explicit `.order_by()`. Now ordered by
   `client__host__name, client__name`.
+- `ophix_tasks` gains `get_revisions_targets()`, declaring its own `tasks` target for
+  `ophix-revisions` (if installed) to discover at runtime — no separate registration
+  needed anywhere else.
 
 ## 2026.06.09.04
 
