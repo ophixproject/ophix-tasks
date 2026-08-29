@@ -14,6 +14,13 @@
   Fixed by binding through jQuery's `.on('change', ...)` when jQuery is present
   (still catches genuine native events too), falling back to `addEventListener` only
   if jQuery isn't loaded at all.
+- Found and fixed the identical bug in `initOutputWarning()` in the same file, while
+  checking for other instances of the same pattern: `stdout_handling`/
+  `stderr_handling` are also forced onto `Select2Widget` by
+  `ScheduledTaskAdmin.formfield_for_choice_field`, so the "stdout=file has no effect
+  when stderr=report" warning wasn't showing or hiding correctly when those
+  dropdowns were changed via Select2's UI either. Same jQuery `.on('change', ...)`
+  fix applied to both.
 
 ## 2026.08.04.01
 

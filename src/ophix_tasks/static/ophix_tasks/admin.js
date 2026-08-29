@@ -207,8 +207,18 @@
             warning.style.display = bad ? '' : 'none';
         }
 
-        stdoutEl.addEventListener('change', update);
-        stderrEl.addEventListener('change', update);
+        // Same Select2/jQuery change-event gap as initIntervalHelp() above —
+        // ScheduledTaskAdmin.formfield_for_choice_field forces Select2Widget onto
+        // every choice field, stdout_handling/stderr_handling included, and Select2
+        // only reports a change via jQuery's .trigger('change'), never a native
+        // DOM event a plain addEventListener('change', ...) would see.
+        if (window.jQuery) {
+            window.jQuery(stdoutEl).on('change', update);
+            window.jQuery(stderrEl).on('change', update);
+        } else {
+            stdoutEl.addEventListener('change', update);
+            stderrEl.addEventListener('change', update);
+        }
         update();
     }
 
