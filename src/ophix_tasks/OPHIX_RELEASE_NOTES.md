@@ -1,6 +1,6 @@
 # Ophix Tasks Release Notes
 
-## Unreleased
+## 2026.08.29.02
 
 - Fixed `2026.08.29.01`'s Select2 change-event fix not actually working — it checked
   `window.jQuery`, which is always `undefined`. Django deliberately does not expose
