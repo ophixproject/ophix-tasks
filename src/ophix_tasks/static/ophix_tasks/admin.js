@@ -114,7 +114,20 @@
             helpEl.style.whiteSpace = text ? 'pre-line' : '';
         }
 
-        schedulerEl.addEventListener('change', update);
+        // #id_scheduler is an FK <select> inside .related-widget-wrapper, so
+        // admin-interface's select2-init.js auto-upgrades it to Select2 (it's not
+        // in autocomplete_fields). Select2 reports a selection change purely via
+        // jQuery's .trigger('change') — there is no native .change() method on a
+        // <select> for jQuery to invoke, so nothing dispatches a real DOM event,
+        // and a plain addEventListener('change', ...) never fires. Bind through
+        // jQuery's .on('change', ...) when available (it still catches genuine
+        // native events too), falling back to addEventListener only if jQuery
+        // isn't present at all.
+        if (window.jQuery) {
+            window.jQuery(schedulerEl).on('change', update);
+        } else {
+            schedulerEl.addEventListener('change', update);
+        }
         update();
     }
 

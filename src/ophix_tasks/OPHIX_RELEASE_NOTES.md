@@ -1,5 +1,20 @@
 # Ophix Tasks Release Notes
 
+## Unreleased
+
+- Fixed the Interval field's scheduler-dependent help text not updating when the
+  Scheduler dropdown was changed through the UI. `#id_scheduler` is an FK `<select>`
+  inside `.related-widget-wrapper`, so `ophix-admin-interface`'s `select2-init.js`
+  auto-upgrades it to Select2 (it isn't in `autocomplete_fields`). Select2 reports a
+  selection change purely via jQuery's `.trigger('change')` — there's no native
+  `.change()` method on a `<select>` for jQuery to invoke as a fallback, so nothing
+  dispatches a real DOM event, and `admin.js`'s `initIntervalHelp()` (bound via plain
+  `addEventListener('change', ...)`) never fired. Same root cause as the `#52` filter
+  dropdown bug documented for `ophix-admin-interface`, just hit independently here.
+  Fixed by binding through jQuery's `.on('change', ...)` when jQuery is present
+  (still catches genuine native events too), falling back to `addEventListener` only
+  if jQuery isn't loaded at all.
+
 ## 2026.08.04.01
 
 - `export_tasks` gains a `--stable` flag: omits the `meta` block and passes `sort_keys=True`,
