@@ -1,6 +1,6 @@
 # Ophix Tasks Release Notes
 
-## Unreleased
+## 2026.08.29.01
 
 - Fixed the Interval field's scheduler-dependent help text not updating when the
   Scheduler dropdown was changed through the UI. `#id_scheduler` is an FK `<select>`
