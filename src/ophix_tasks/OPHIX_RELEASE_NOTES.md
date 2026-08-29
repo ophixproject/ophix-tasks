@@ -1,5 +1,19 @@
 # Ophix Tasks Release Notes
 
+## Unreleased
+
+- Fixed `2026.08.29.01`'s Select2 change-event fix not actually working — it checked
+  `window.jQuery`, which is always `undefined`. Django deliberately does not expose
+  jQuery as a plain global: `jquery.init.js` calls `jQuery.noConflict(true)`, which
+  strips both `window.$` and `window.jQuery` and re-exposes jQuery only as
+  `window.django.jQuery`. Since the check silently failed, both fixes fell straight
+  back to the same broken `addEventListener('change', ...)` path as before — no
+  error, no console output, matching the reported symptom exactly ("no response and
+  nothing on the console"). Confirmed the correct reference by reading
+  `select2-init.js` and `dropdown-filter.js` directly (both already use
+  `window.django && window.django.jQuery`) rather than re-guessing. Both
+  `initIntervalHelp()` and `initOutputWarning()` now use the same reference.
+
 ## 2026.08.29.01
 
 - Fixed the Interval field's scheduler-dependent help text not updating when the

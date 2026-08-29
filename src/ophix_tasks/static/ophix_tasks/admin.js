@@ -122,9 +122,13 @@
         // and a plain addEventListener('change', ...) never fires. Bind through
         // jQuery's .on('change', ...) when available (it still catches genuine
         // native events too), falling back to addEventListener only if jQuery
-        // isn't present at all.
-        if (window.jQuery) {
-            window.jQuery(schedulerEl).on('change', update);
+        // isn't present at all. Django deliberately does NOT expose jQuery as
+        // window.jQuery (jquery.init.js calls noConflict(true), stripping both
+        // window.$ and window.jQuery) — it's only available as window.django.jQuery,
+        // the same reference select2-init.js and dropdown-filter.js already use.
+        var $ = window.django && window.django.jQuery;
+        if ($) {
+            $(schedulerEl).on('change', update);
         } else {
             schedulerEl.addEventListener('change', update);
         }
@@ -211,10 +215,13 @@
         // ScheduledTaskAdmin.formfield_for_choice_field forces Select2Widget onto
         // every choice field, stdout_handling/stderr_handling included, and Select2
         // only reports a change via jQuery's .trigger('change'), never a native
-        // DOM event a plain addEventListener('change', ...) would see.
-        if (window.jQuery) {
-            window.jQuery(stdoutEl).on('change', update);
-            window.jQuery(stderrEl).on('change', update);
+        // DOM event a plain addEventListener('change', ...) would see. jQuery is
+        // only exposed as window.django.jQuery, never window.jQuery (see
+        // initIntervalHelp()'s comment above).
+        var $ = window.django && window.django.jQuery;
+        if ($) {
+            $(stdoutEl).on('change', update);
+            $(stderrEl).on('change', update);
         } else {
             stdoutEl.addEventListener('change', update);
             stderrEl.addEventListener('change', update);
