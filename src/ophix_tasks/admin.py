@@ -160,7 +160,7 @@ def linked_schedules(self, obj):
         else:
             items.append(
                 format_html(
-                    "• <span style='color: color-mix(in srgb, var(--admin-interface-delete-button-background-color) 60%, currentColor 40%); font-style: italic;'>{}</span>",
+                    "• <span style='color: var(--admin-interface-disabled-color); font-weight: 600;'>{}</span>",
                     label,
                 )
             )
@@ -234,7 +234,7 @@ class ScheduleAdmin(CleanSaveMessageMixin, admin.ModelAdmin):
             else:
                 items.append(
                     format_html(
-                        "• <span style='color: color-mix(in srgb, var(--admin-interface-delete-button-background-color) 60%, currentColor 40%); font-style: italic;'>{}</span>",
+                        "• <span style='color: var(--admin-interface-disabled-color); font-weight: 600;'>{}</span>",
                         label,
                     )
                 )

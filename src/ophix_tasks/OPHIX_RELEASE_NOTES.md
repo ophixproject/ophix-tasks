@@ -1,5 +1,15 @@
 # Ophix Tasks Release Notes
 
+## 2026.08.30.01
+
+- Disabled-client/disabled-schedule styling in the "Authorised Schedules"
+  (Client admin) and "Authorised Clients" (Schedule admin) linked-artifact
+  columns changed from an italic red-tinted mix
+  (`color-mix(..., var(--admin-interface-delete-button-background-color) ...)`)
+  to the theme's dedicated disabled colour at a heavier weight
+  (`var(--admin-interface-disabled-color); font-weight: 600`), matching the
+  same treatment applied fleet-wide to changelist disabled rows.
+
 ## 2026.08.29.03
 
 - Fixed Description/Command textareas rendering wider than intended on `ScheduledTask`'s
