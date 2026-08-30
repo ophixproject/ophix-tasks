@@ -1,5 +1,13 @@
 # Ophix Tasks Release Notes
 
+## 2026.08.30.02
+
+- Fixed `2026.08.30.01`'s disabled-link colour change dropping the italic
+  style — it should be kept alongside the new colour and weight, not
+  replaced. `_DISABLED_STYLE`-equivalent spans now read
+  `var(--admin-interface-disabled-color); font-weight: 600; font-style:
+  italic`.
+
 ## 2026.08.30.01
 
 - Disabled-client/disabled-schedule styling in the "Authorised Schedules"
