@@ -1,5 +1,26 @@
 # Ophix Tasks Release Notes
 
+## Unreleased
+
+- Fixed Description/Command textareas rendering wider than intended on `ScheduledTask`'s
+  change form — two compounding causes, both predating this session's Django 6.1 CSS
+  work entirely. `formfield_overrides` uses a plain `forms.Textarea(attrs={"rows": 3,
+  "cols": 100})` — not Django's own `AdminTextareaWidget` — so it never got the
+  `vLargeTextField` CSS class that normally caps a textarea's width; `cols=100` alone
+  gives the browser a huge intrinsic size with no ceiling. `admin.css` had a
+  `.form-row textarea { width: 125% }` rule ("25% wider than default") compensating
+  for this, tuned against the container's width at the time it was written — once
+  this session's other fixes changed that baseline width, 125% of it computed to
+  something oversized instead. Fixed by removing the percentage hack from `admin.css`
+  entirely and setting an explicit `"style": "width: 1240px;"` directly on the widget
+  in `admin.py`, sized to comfortably fit a long rsync-style command after subtracting
+  the nav sidebar and label column from a 1920px-wide screen. An inline style always
+  wins over any external stylesheet rule regardless of specificity, so there's no
+  interaction to manage between the two fixes. The identical unbounded-textarea
+  pattern also exists in `ScheduleTaskInline`/`ClientScheduleAccessInline`
+  (`cols=120`) and one other spot (`cols=80`) in this file — left alone for now since
+  only the ScheduledTask form was in scope, flagged for later if wanted there too.
+
 ## 2026.08.29.02
 
 - Fixed `2026.08.29.01`'s Select2 change-event fix not actually working — it checked

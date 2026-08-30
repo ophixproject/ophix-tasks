@@ -277,7 +277,16 @@ class ScheduledTaskAdmin(CleanSaveMessageMixin, admin.ModelAdmin):
         }),
     ]
     formfield_overrides = {
-        models.TextField: {"widget": forms.Textarea(attrs={"rows": 3, "cols": 100})},
+        # A plain forms.Textarea (not Django's AdminTextareaWidget) never gets the
+        # vLargeTextField CSS class, so nothing caps its width — cols=100 alone gives
+        # the browser a huge intrinsic size with no ceiling. admin.css used to
+        # compensate with a percentage-based `width: 125%` hack tuned against the
+        # container's width at the time it was written; that's now removed in favor
+        # of this explicit inline width, sized to comfortably fit a long rsync-style
+        # command after subtracting the nav sidebar and label column from a
+        # 1920px-wide screen. An inline style here always wins over any external
+        # stylesheet rule, so no interaction with admin.css to worry about.
+        models.TextField: {"widget": forms.Textarea(attrs={"rows": 3, "cols": 100, "style": "width: 1240px;"})},
         models.DateTimeField: {"widget": AdminSplitDateTime(attrs={"style": "width: auto;"})},
     }
 
