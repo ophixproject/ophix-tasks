@@ -1,6 +1,6 @@
 # Ophix Tasks Release Notes
 
-## Unreleased
+## 2026.08.29.03
 
 - Fixed Description/Command textareas rendering wider than intended on `ScheduledTask`'s
   change form — two compounding causes, both predating this session's Django 6.1 CSS
