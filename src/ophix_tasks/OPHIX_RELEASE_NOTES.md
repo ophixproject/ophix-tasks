@@ -1,5 +1,23 @@
 # Ophix Tasks Release Notes
 
+## 2026.09.26.01
+
+- Docs: README.md and task-scheduling.md never documented the `Scheduler`
+  model/`scheduler` field at all (a real, migration-seeded concept that
+  determines the expected `interval` format and is how Tier 2 clients know
+  which tasks are theirs), even though task-backup.md already covered it for
+  export/import. Added a Scheduler concept section to both, updated field
+  tables and JSON examples, and documented the task-level `paused` flag
+  (previously only explained in task-crontab.md) and the full
+  `ClientScheduleAccess` permission flag set (`can_delete`, `paused`, `notes`
+  were missing).
+- Docs: task-client.md corrected to match `ophix-task-client`'s own README fix
+  — `get_tasks()`/`create_task()` signatures were missing `scheduler`
+  entirely, and the "disabled tasks are included" claim was backwards
+  (disabled tasks are excluded from the API response outright; `paused` tasks
+  are the ones still returned for Tier 2 clients to write as inactive
+  entries).
+
 ## 2026.08.30.02
 
 - Fixed `2026.08.30.01`'s disabled-link colour change dropping the italic

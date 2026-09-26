@@ -96,6 +96,7 @@ Create a task on the server. The client must have `can_update` access to the Sch
 ```bash
 task-client create-task \
   --schedule server-maintenance \
+  --scheduler cron \
   --name nightly-backup \
   --command "/opt/backup.sh" \
   --description "Nightly backup" \
@@ -107,10 +108,11 @@ task-client create-task \
 | Argument | Required | Description |
 | --- | --- | --- |
 | `--schedule` | Yes | Schedule name to add the task to |
+| `--scheduler` | No | Scheduler type (e.g. `cron`, `systemd`, `wts`) — must match an existing, enabled Scheduler on the server. Determines the expected `--interval` format. |
 | `--name` | Yes | Task name |
 | `--command` | Yes | Command to execute |
 | `--description` | No | Comment written above the cron entry |
-| `--interval` | No | Cron expression for recurring tasks |
+| `--interval` | No | An expression in the format the assigned `--scheduler` expects (e.g. a cron expression for `cron`) |
 | `--run-at` | No | ISO datetime for a one-off task |
 | `--stdout-handling` | No | `inherit` (default), `report`, `null`, `file` |
 | `--stderr-handling` | No | `inherit` (default), `report`, `null`, `merge`, `file` |
@@ -158,7 +160,7 @@ Import from `task_client.core`:
 from task_client.core import get_tasks, create_task
 ```
 
-### `get_tasks(schedule=None, server_url=None, api_token=None, ca_cert=None)`
+### `get_tasks(schedule=None, scheduler=None, server_url=None, api_token=None, ca_cert=None)`
 
 Fetch the task list from the task server. Returns a list of task dicts.
 
@@ -168,6 +170,9 @@ tasks = get_tasks()
 
 # Tasks for a specific named schedule only
 tasks = get_tasks(schedule="server-maintenance")
+
+# Only tasks assigned to a given scheduler type
+tasks = get_tasks(scheduler="cron")
 ```
 
 Each task dict contains:
@@ -176,14 +181,16 @@ Each task dict contains:
 | --- | --- | --- |
 | `id` | int | Task ID (used for `task-client report`) |
 | `schedule` | str | Schedule name |
+| `scheduler` | str or null | Assigned Scheduler name (e.g. `cron`, `systemd`) — governs the expected `interval` format |
 | `name` | str | Task name |
 | `command` | str | Command to execute |
 | `description` | str | Optional comment text |
 | `run_at` | str or null | ISO datetime for one-off tasks |
-| `interval` | str | Cron expression for recurring tasks |
+| `interval` | str | Interval expression matching the assigned scheduler's format |
 | `starts_at` | str or null | Active window start |
 | `ends_at` | str or null | Active window end |
-| `enabled` | bool | Whether the task is enabled (disabled tasks are included for Tier 2 clients to comment out) |
+| `enabled` | bool | Disabled tasks (`enabled=False`) are excluded from the response entirely, not just flagged |
+| `paused` | bool | An effective value — true if the task, its Schedule, or this client's access to that Schedule is paused. Paused tasks are still returned, for Tier 2 clients to write as commented-out/disabled entries. |
 | `stdout_handling` | str | `inherit`, `report`, `null`, or `file` |
 | `stderr_handling` | str | `inherit`, `report`, `null`, `merge`, or `file` |
 | `log_file` | str | Log file path (empty string if not set) |
@@ -197,6 +204,7 @@ Create a task on the server. Returns `{"status": "created"|"skipped", "id": <int
 ```python
 result = create_task(
     schedule="server-maintenance",
+    scheduler="cron",
     name="nightly-backup",
     command="/opt/backup.sh",
     description="Nightly backup script",
@@ -214,7 +222,8 @@ create_task(
     name,                       # Task name (required)
     command,                    # Command to execute (required)
     description="",             # Comment text
-    interval="",                # Cron expression
+    scheduler="",               # Scheduler name (e.g. "cron", "systemd") - determines expected interval format
+    interval="",                # Interval expression matching the scheduler's format
     run_at=None,                # ISO datetime string for one-off tasks
     starts_at=None,             # ISO datetime string
     ends_at=None,               # ISO datetime string

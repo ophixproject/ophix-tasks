@@ -17,16 +17,26 @@ A **Schedule** is a named collection of tasks — the artifact that clients are 
 
 Clients are linked to Schedules via the **Client Schedule Access** join record. A client may hold access to multiple Schedules simultaneously, receiving tasks from all of them. Disabling a Schedule, Client, Host, or access record all prevent task delivery.
 
+### Schedulers
+
+A **Scheduler** is a named target scheduling system — `cron`, `systemd`, `wts`, etc. — seeded into the database by migration when `ophix-tasks` is installed. Each Scheduler carries a validator class that checks a task's `interval` field is in the format that scheduler expects (a 5-field cron expression for `cron`, a systemd calendar spec for `systemd`), plus operator-facing help text explaining that format, shown when editing a task in the admin.
+
+Operators can disable a Scheduler they don't use; disabled Schedulers can no longer be selected on new tasks, but existing tasks referencing them are unaffected.
+
+Every Scheduled Task is assigned to exactly one Scheduler via its `scheduler` field. This is how Tier 2 clients know which tasks are theirs: `ophix-task-crontab` only applies tasks whose `scheduler` is `cron`; `ophix-task-systemd` only applies tasks whose `scheduler` is `systemd`.
+
 ### Scheduled Tasks
 
 A **Scheduled Task** is one entry within a Schedule. It defines what to run and when.
+
+**Scheduler:** Every task is assigned to exactly one **Scheduler** (see above) via the `scheduler` field. This determines the expected format of `interval` below.
 
 **Scheduling:** Exactly one of `run_at` or `interval` must be set:
 
 | Field | Description |
 | --- | --- |
 | `run_at` | One-off: the exact date and time to execute |
-| `interval` | Recurring: a standard cron expression, e.g. `0 2 * * *` |
+| `interval` | Recurring: an expression in the format the assigned Scheduler expects — a cron expression (e.g. `0 2 * * *`) for `cron`, a systemd calendar spec for `systemd` |
 
 **Timezone consistency:** The admin displays `run_at` values in the timezone configured by `TIME_ZONE` in the server's `.env`. Cron expressions in `interval` are interpreted by the cron daemon on the client host using the **client OS timezone**. These two must be consistent:
 
@@ -44,6 +54,17 @@ UTC is the recommended setting for operators managing fleets across multiple tim
 | `ends_at` | Stop returning this task after this date and time |
 
 The server enforces these windows in the API response — the client does not need to evaluate them.
+
+**State flags:**
+
+| Field | Description |
+| --- | --- |
+| `enabled` | Disabled tasks are not returned by the API at all |
+| `paused` | Paused tasks are still returned, but Tier 2 clients write them as commented-out/disabled entries rather than active ones |
+
+A Schedule itself carries the same `enabled`/`paused` pair, applying to every task within it. `ClientScheduleAccess` (below) additionally carries its own `paused` flag, scoped to one client's view of one Schedule only.
+
+**The `paused` value returned by the API is an effective value, not just the task's own field** — it is `true` if the task itself is paused, *or* if the Schedule is paused, *or* if this specific client's `ClientScheduleAccess` to that Schedule is paused. A task can therefore appear paused to one client and active to another, depending on which client is asking, even though the task's own `paused` field never changed.
 
 **Output handling:** Controls where stdout and stderr go when the task runs:
 
@@ -63,6 +84,9 @@ The join record linking a Client to a Schedule. Permission flags:
 | --- | --- |
 | `enabled` | Client receives tasks from this Schedule |
 | `can_update` | Client may create tasks within this Schedule via the API |
+| `can_delete` | Client may delete tasks within this Schedule via the API — only effective when `ENABLE_ARTIFACT_DELETE=True` in `.env` |
+| `paused` | Pause this Schedule for this client only, without affecting other clients linked to the same Schedule |
+| `notes` | Free-text operator note about this access link |
 
 A client may hold access to multiple enabled Schedules at the same time. There is no server-enforced limit — the operator manages which Schedules each client syncs by configuring the Tier 2 client (e.g. `task-crontab sync --schedule <name>`).
 
@@ -80,8 +104,8 @@ Go to **Task Scheduling → Schedules → Add Schedule**. Give it a name (e.g. `
 
 Add tasks in the **Scheduled Tasks** inline on the Schedule. Group your fields:
 
-- **Identity:** name, enabled flag, description
-- **Schedule:** run_at or interval, optional starts_at and ends_at
+- **Identity:** name, enabled flag, paused flag, description
+- **Schedule:** scheduler, run_at or interval, optional starts_at and ends_at
 - **Output handling:** stdout_handling, stderr_handling, log_file
 
 ### 2. Grant Client Access
@@ -124,6 +148,7 @@ Returns only tasks belonging to the named Schedule.
   {
     "id": 1,
     "schedule": "server-maintenance",
+    "scheduler": "cron",
     "name": "nightly-backup",
     "command": "/opt/backup.sh",
     "description": "Runs the nightly backup script",
@@ -132,6 +157,7 @@ Returns only tasks belonging to the named Schedule.
     "starts_at": null,
     "ends_at": null,
     "enabled": true,
+    "paused": false,
     "stdout_handling": "report",
     "stderr_handling": "merge",
     "log_file": ""
@@ -156,6 +182,7 @@ Creates a task in the named Schedule. Requires `can_update` on the access record
 ```json
 {
   "schedule": "server-maintenance",
+  "scheduler": "cron",
   "name": "nightly-backup",
   "command": "/opt/backup.sh",
   "description": "Runs the nightly backup script",
@@ -164,6 +191,8 @@ Creates a task in the named Schedule. Requires `can_update` on the access record
   "stderr_handling": "merge"
 }
 ```
+
+`scheduler` is optional (blank by default) — omit it if the task doesn't need scheduler-specific interval validation. If given, it must be the `name` of an existing, enabled Scheduler (e.g. `cron`, `systemd`); an unknown name is rejected with a validation error.
 
 **Response (201):**
 

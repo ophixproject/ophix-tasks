@@ -26,14 +26,21 @@ custom branding; the built-in Ophix theme is active on fresh installs by default
 
 A named collection of tasks — the artifact clients are linked to. A host may hold access to multiple Schedules simultaneously, receiving tasks from all of them.
 
+### Scheduler
+
+A named target scheduling system (`cron`, `systemd`, `wts`, etc.), seeded by migration. Each Scheduler carries a validator class that checks the `interval` field is in the format that scheduler expects (a cron expression for `cron`, a systemd calendar spec for `systemd`), plus operator-facing help text explaining that format. Operators can disable a Scheduler they don't support; disabled Schedulers cannot be selected on new tasks.
+
+Each Scheduled Task is assigned to exactly one Scheduler via its `scheduler` field. Tier 2 clients use this to pick up only the tasks meant for them — `ophix-task-crontab` applies `cron`-scheduled tasks, `ophix-task-systemd` applies `systemd`-scheduled ones.
+
 ### Scheduled Task
 
 An individual task within a Schedule. Each task has exactly one scheduling mode:
 
 | Field | Description |
 | --- | --- |
+| `scheduler` | Target scheduling system (see Scheduler above) — governs the expected `interval` format |
 | `run_at` | One-off: exact date and time to execute |
-| `interval` | Recurring: cron expression (e.g. `0 2 * * *`) |
+| `interval` | Recurring: an expression in the format the assigned `scheduler` expects (e.g. `0 2 * * *` for cron) |
 
 Optional time bounds enforced server-side:
 
@@ -41,6 +48,13 @@ Optional time bounds enforced server-side:
 | --- | --- |
 | `starts_at` | Do not return this task before this date and time |
 | `ends_at` | Stop returning this task after this date and time |
+
+State flags:
+
+| Field | Description |
+| --- | --- |
+| `enabled` | Disabled tasks are not returned by the server at all |
+| `paused` | Paused tasks are still returned, but Tier 2 clients write them as commented-out/disabled entries rather than active ones |
 
 Output handling controls where stdout and stderr go when the task runs:
 
@@ -52,9 +66,11 @@ Output handling controls where stdout and stderr go when the task runs:
 
 `description` is an optional note written as a comment above the cron entry.
 
+A Schedule itself also has an `enabled`/`paused` pair with the same meaning, applying to every task within it.
+
 ### Client Schedule Access
 
-Links a Client to a Schedule. Flags: `enabled`, `can_update` (allows the client to create tasks via the API).
+Links a Client to a Schedule. Flags: `enabled` (client can read tasks from this Schedule), `can_update` (client may create tasks via the API), `can_delete` (gated by `ENABLE_ARTIFACT_DELETE` in `.env`), `paused` (pause this Schedule for this client only, without affecting other clients), `notes` (free-text operator note).
 
 ---
 
