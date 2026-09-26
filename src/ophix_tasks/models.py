@@ -33,18 +33,18 @@ from ophix.core.models import ClientArtifactBase
 
 
 STDOUT_CHOICES = [
-    ("inherit", "Default (scheduler handles output)"),
-    ("report", "Report to server"),
-    ("null", "Discard (/dev/null)"),
-    ("file", "Append to log file"),
+    ("inherit", _("Default (scheduler handles output)")),
+    ("report", _("Report to server")),
+    ("null", _("Discard (/dev/null)")),
+    ("file", _("Append to log file")),
 ]
 
 STDERR_CHOICES = [
-    ("inherit", "Default (scheduler handles errors)"),
-    ("report", "Report to server"),
-    ("null", "Discard (/dev/null)"),
-    ("merge", "Merge with stdout (2>&1)"),
-    ("file", "Append to log file"),
+    ("inherit", _("Default (scheduler handles errors)")),
+    ("report", _("Report to server")),
+    ("null", _("Discard (/dev/null)")),
+    ("merge", _("Merge with stdout (2>&1)")),
+    ("file", _("Append to log file")),
 ]
 
 
@@ -221,9 +221,9 @@ class ScheduledTask(models.Model):
 
 
 STREAM_CHOICES = [
-    ("stdout", "stdout only"),
-    ("stderr", "stderr only"),
-    ("both", "stdout + stderr"),
+    ("stdout", _("stdout only")),
+    ("stderr", _("stderr only")),
+    ("both", _("stdout + stderr")),
 ]
 
 

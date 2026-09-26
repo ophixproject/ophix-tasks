@@ -1,5 +1,9 @@
 # Ophix Tasks Release Notes
 
+## 2026.09.26.03
+
+- i18n regression check: `STDOUT_CHOICES`/`STDERR_CHOICES`/`STREAM_CHOICES` in `models.py` render as admin dropdown/list labels but their strings were unwrapped, unlike every other field in the same file. Wrapped in `gettext_lazy`.
+
 ## 2026.09.26.02
 
 - Verified real compatibility under Python 3.14 (not just added the classifier) as part of the taskserver-release-wave compatibility sweep, and added `Programming Language :: Python :: 3.14` to the package classifiers.
