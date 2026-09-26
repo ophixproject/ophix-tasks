@@ -26,6 +26,7 @@ from datetime import timedelta
 
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -115,7 +116,7 @@ class TaskListView(APIView):
             # If the schedule doesn't exist at all, auto-create it and grant access.
             # If it exists but this client lacks permission, refuse — explicit grant required.
             if Schedule.objects.filter(name=schedule_name).exists():
-                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"detail": str(_("Not found."))}, status=status.HTTP_404_NOT_FOUND)
             schedule = Schedule.objects.create(name=schedule_name)
             access = ClientScheduleAccess.objects.create(
                 client=client,
@@ -141,7 +142,7 @@ class TaskListView(APIView):
                 scheduler = Scheduler.objects.get(name=scheduler_name)
             except Scheduler.DoesNotExist:
                 return Response(
-                    {"scheduler": ["Unknown scheduler: {!r}".format(scheduler_name)]},
+                    {"scheduler": [str(_("Unknown scheduler: %(name)r")) % {"name": scheduler_name}]},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -176,7 +177,7 @@ class TaskReportView(APIView):
         try:
             task = ScheduledTask.objects.select_related("schedule").get(pk=task_id)
         except ScheduledTask.DoesNotExist:
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": str(_("Not found."))}, status=status.HTTP_404_NOT_FOUND)
 
         has_access = ClientScheduleAccess.objects.filter(
             client=client,
@@ -186,7 +187,7 @@ class TaskReportView(APIView):
         ).exists()
 
         if not has_access:
-            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": str(_("Not found."))}, status=status.HTTP_404_NOT_FOUND)
 
         output = request.data.get("output", "")
         stream = request.data.get("stream", "both")

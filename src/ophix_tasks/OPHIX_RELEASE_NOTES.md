@@ -1,5 +1,9 @@
 # Ophix Tasks Release Notes
 
+## 2026.09.26.04
+
+- i18n: wrapped the fleet-API JSON error strings in `views.py` (`"Not found."`, `"Unknown scheduler: ..."`) that were previously left unwrapped to match a sibling-domain convention. Reconsidered after confirming every known Tier 1 client (`ophix-client-core`'s shared commands, `ophix-task-client`'s `core.py`) branches purely on HTTP status code and only ever *displays* the JSON body text to the operator, never parses it for control flow — so translating it is safe and has no client-compatibility risk.
+
 ## 2026.09.26.03
 
 - i18n regression check: `STDOUT_CHOICES`/`STDERR_CHOICES`/`STREAM_CHOICES` in `models.py` render as admin dropdown/list labels but their strings were unwrapped, unlike every other field in the same file. Wrapped in `gettext_lazy`.
