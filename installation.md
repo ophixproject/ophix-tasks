@@ -27,13 +27,16 @@ You will need:
   systemd distros, so nothing to configure there. `adduser` below is the Debian/Ubuntu frontend to
   `useradd`; on other distros use the equivalent for yours.
 
-- `mysqlclient` (MariaDB/MySQL client bindings) is a hard dependency of `ophix-server-base`, and
-  it's a C extension. If pip has to build it from source on your platform (no prebuilt wheel
-  available), you'll also need build tools installed first:
+- If you're using the recommended default engine, `ophix-dbengine-mariadb` (Step 2 below) brings in
+  `mysqlclient` (MariaDB/MySQL client bindings), which is a C extension. If pip has to build it
+  from source on your platform (no prebuilt wheel available), you'll also need build tools
+  installed first:
 
   ```bash
   sudo apt install -y build-essential default-libmysqlclient-dev pkg-config python3-dev
   ```
+
+  Using a different engine instead? Skip this — it's only needed for MariaDB/MySQL.
 
 - An SSL/TLS certificate for the hostname you'll run the server on. It can be from a public CA, or
   self-issued for internal use — [`ophix-ca-tools`](https://github.com/ophixproject/ophix-ca-tools)
