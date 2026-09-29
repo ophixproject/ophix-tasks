@@ -125,11 +125,7 @@ pip install ophix-tasks ophix-dbengine-mariadb ophix-docs ophix-client-managemen
 ophix-manage configure_install ophixtaskserver
 ```
 
-This is chosen as the slug deliberately - it doesn't have to match the install directory name
-(`taskserver` above), and giving it the `ophix` prefix here means the resulting systemd service
-(`ophixtaskserver`) reads unambiguously in `systemctl status` alongside any other, non-Ophix
-services on the box. Use whatever slug you like; it becomes the name of every generated file and
-the service itself.
+In this command "ophixtaskserver" is the slug, this example is chosen deliberately - it doesn't have to match the install directory name (`taskserver` above), and giving it the `ophix` prefix here means the resulting systemd service (`ophixtaskserver`) reads unambiguously in `systemctl status` alongside any other, non-Ophix services on the box. Use whatever slug you like; it becomes the name of every generated file and the service itself.
 
 The wizard is interactive and asks for:
 
@@ -142,10 +138,7 @@ The wizard is interactive and asks for:
   the wizard validates the certificate actually covers the hostname you gave, and warns if not
 - Database engine and connection details, with a live connection test before anything is saved
 - Superuser username, email, and password (your first admin login)
-- Theme to activate and admin title, if a theme package is installed
-
-`ophix-tasks` has no domain-specific secret to generate at this step (unlike, say, `ophix-creds`,
-which needs an encryption key) - nothing extra to prepare here beyond the above.
+- Theme to activate and admin title, the "Ophix" theme is included by default.
 
 The wizard writes `.ophixtaskserver.conf` (used by the next step) and `.env` (Django's runtime
 settings, with everything above already patched in) - both `chmod 600`. It's safe to re-run at any
@@ -164,8 +157,8 @@ Reads `.ophixtaskserver.conf` and, in one pass:
 3. Generates `ophixtaskserver.nginx.conf`
 4. Generates `ophixtaskserver.service` (the systemd unit)
 5. Generates `ophixtaskserver_sudo_install.sh` - the root script for Step 5
-6. Generates `ophixtaskserver_sudo_uninstall.sh`
-7. Runs database migrations
+6. Generates `ophixtaskserver_sudo_uninstall.sh` - can be run as root for a clean uninstall
+7. Runs database migrations - creates the database structure in your empty database
 8. Collects static files
 9. Creates the superuser account
 10. Activates the selected theme and sets the admin title
@@ -193,10 +186,9 @@ That's it - you're done. The admin UI should now be live at `https://<your-hostn
 
 ## Next steps
 
+- Login with your superuser account
 - Go to **Admin → Hosts** and create a Host entry for each machine that will run a client - clients
   register themselves against a Host's IP on first run.
-- See the **Client Quickstart** doc (in the admin's Documentation panel, since `ophix-docs` is
-  installed) for how to bootstrap a client against this server.
-- For `ophix-tasks` specifically: install `ophix-task-client` on each host, plus whichever
-  scheduler backend applies (`ophix-task-crontab` for cron-based tasks, `ophix-task-systemd` for
-  systemd timer units).
+- See the **Client Quickstart** doc (in the admin's Documentation panel, if `ophix-docs` is
+  installed) for how to bootstrap a client against this server.  
+- For `ophix-tasks` specific instructions go to **Documentation → Search** and search for `task-client`.  You will need to install `ophix-task-client` and at least one of `ophix-task-crontab` and `ophix-task-systemd`
