@@ -136,7 +136,10 @@ The wizard is interactive and asks for:
   Prerequisites note above if you're on a distro that lays nginx config out differently
 - TLS certificate and private key paths - point these at the files from the Prerequisites step;
   the wizard validates the certificate actually covers the hostname you gave, and warns if not
-- Database engine and connection details, with a live connection test before anything is saved
+- Database engine and connection details, with a live connection test before anything is saved.
+  Since `ophix-dbengine-mariadb` is the only engine plugin installed in this guide's Step 2, the
+  wizard auto-selects it and won't even prompt for the engine — you'll just see the host/port/
+  credential prompts.
 - Superuser username, email, and password (your first admin login)
 - Theme to activate and admin title, the "Ophix" theme is included by default.
 
