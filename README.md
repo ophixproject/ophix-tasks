@@ -1,25 +1,16 @@
 # ophix-tasks
 
-Task scheduling domain plugin for [Ophix Project](https://ophix.io) servers.
+**Centralized task scheduling for your server fleet** — part of [Ophix](https://ophix.io), a modular, self-hosted fleet management platform.
 
-Operators define named Schedules containing task definitions. Clients are granted access at the Schedule level and receive all active tasks in a single API call. Tier 2 clients apply the task list to the host's native scheduler.
+If your servers have accumulated a scattered mess of forgotten cron jobs, systemd timers nobody remembers writing, and scripts nobody's sure are still needed — `ophix-tasks` gives you one place to define, audit, and manage scheduled tasks across every host, instead of SSHing into each one to find out what's actually running.
+
+Operators define named Schedules containing task definitions in one central admin panel. Each host runs a lightweight client that pulls its assigned tasks and applies them to the host's native scheduler (cron or systemd) — so execution stays exactly where it's always lived, just no longer invisible.
 
 ---
 
 ## Installation
 
-```bash
-pip install ophix-tasks ophix-dbengine-mariadb ophix-docs venv-cmds
-ophix-manage configure_install taskserver
-ophix-manage run_install taskserver
-sudo bash taskserver-sudo-install.sh
-```
-
-`ophix-dbengine-mariadb` installs the MariaDB/MySQL driver — every database engine needs its
-matching `ophix-dbengine-*` plugin installed explicitly; none is bundled by default. Install a
-different one (`ophix-dbengine-postgres`, etc.) if you're using another engine. `ophix-docs` and
-`venv-cmds` are recommended but optional. The built-in Ophix theme is active on fresh installs by
-default.
+See [installation.md](installation.md) for the full step-by-step guide — service user, TLS setup, the guided installer, and getting the service running under nginx and systemd.
 
 ---
 
