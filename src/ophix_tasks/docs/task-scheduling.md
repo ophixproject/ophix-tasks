@@ -243,10 +243,10 @@ Set in `.env`. All other behaviour is managed via the admin UI.
 ## Server Setup
 
 ```bash
-pip install ophix-tasks ophix-docs venv-cmds
+pip install ophix-tasks ophix-dbengine-mariadb ophix-docs venv-cmds
 ophix-manage configure_install taskserver
 ophix-manage run_install taskserver
-sudo bash taskserver_sudo_install.sh
+sudo bash taskserver-sudo-install.sh
 ```
 
 To reload docs after upgrading:

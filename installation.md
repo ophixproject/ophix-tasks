@@ -157,12 +157,24 @@ Reads `.ophixtaskserver.conf` and, in one pass:
 2. Copies your TLS certificate and key into `ssl/certs/` and `ssl/private/`
 3. Generates `ophixtaskserver.nginx.conf`
 4. Generates `ophixtaskserver.service` (the systemd unit)
-5. Generates `ophixtaskserver_sudo_install.sh` - the root script for Step 5
-6. Generates `ophixtaskserver_sudo_uninstall.sh` - can be run as root for a clean uninstall
+5. Generates `ophixtaskserver-sudo-install.sh` - the root script for Step 5
+6. Generates `ophixtaskserver-sudo-uninstall.sh` - can be run as root for a clean uninstall
 7. Runs database migrations - creates the database structure in your empty database
 8. Collects static files
 9. Creates the superuser account
 10. Activates the selected theme and sets the admin title
+11. Loads inline documentation, since `ophix-docs` is installed
+12. Generates static error pages (400, 403, 404, 500, 503) using the active theme
+13. Creates the backup directory and generates `ophixtaskserver-backup.sh`, since Step 3
+    configured a backup directory
+14. Generates `ophixtaskserver-update.sh`, a convenience script for future upgrades
+15. Runs `check_updates` quietly, to populate the Plugin Versions admin page for the
+    first time - nothing else does this on a fresh install; `ophixtaskserver-update.sh`
+    keeps it current on every upgrade after this
+
+All generated filenames use the slug (`ophixtaskserver`), not `ophix-tasks`'s own default
+server name (`taskserver`) - this is what keeps filenames unique if you ever run more than
+one taskserver instance on the same box.
 
 Available flags if you need to skip a step: `--skip-migrate`, `--skip-collectstatic`,
 `--skip-superuser`.
@@ -172,7 +184,7 @@ Available flags if you need to skip a step: `--skip-migrate`, `--skip-collectsta
 Back with `sudo` access (exit the `ophix` shell, or open a new one):
 
 ```bash
-sudo bash ophixtaskserver_sudo_install.sh
+sudo bash ophixtaskserver-sudo-install.sh
 ```
 
 This is the only step that touches anything outside the install directory. It:
