@@ -137,7 +137,7 @@ The wizard is interactive and asks for:
 - TLS certificate and private key paths - point these at the files from the Prerequisites step;
   the wizard validates the certificate actually covers the hostname you gave, and warns if not
 - Database engine and connection details, with a live connection test before anything is saved.
-  If you only installed one engine in Step 2 (eg. `ophix-dbengine-mariadb`), it will be auto selected and you'll just be asked for host/port/credentials.  If you installed more than one for some reason, you'll be asked to pick which one you want to use.
+  If you only installed one engine in Step 2 (eg. `ophix-dbengine-mariadb`), it will be auto-selected and you'll just be asked for host/port/credentials.  If you installed more than one for some reason, you'll be asked to pick which one you want to use.
 - Superuser username, email, and password (your first admin login)
 - Theme to activate and admin title, the "Ophix" theme is included by default.
 
