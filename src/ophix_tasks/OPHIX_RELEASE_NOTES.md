@@ -1,5 +1,18 @@
 # Ophix Tasks Release Notes
 
+## 2026.10.04.01
+
+- Added `installation.md` — a full production-style install walkthrough (dedicated service
+  user, venv, TLS via `ophix-ca-tools`, the guided `configure_install`/`run_install` steps,
+  nginx/systemd integration) alongside the existing quick-install README. Verified against a
+  real live taskserver install on `ipc2` this session, and corrected as real gaps surfaced
+  during that walkthrough: the explicit `ophix-dbengine-mariadb` install step (no engine is
+  bundled by default), the engine auto-select wording, a "what versions do I already have"
+  check block for Prerequisites, and a reminder in Next steps to confirm DNS actually resolves
+  to the host before expecting the admin UI to be reachable.
+- Reworked `README.md`'s opening with a hook-first pitch, and linked its Installation section
+  to `installation.md` instead of duplicating the install steps.
+
 ## 2026.09.26.04
 
 - i18n: wrapped the fleet-API JSON error strings in `views.py` (`"Not found."`, `"Unknown scheduler: ..."`) that were previously left unwrapped to match a sibling-domain convention. Reconsidered after confirming every known Tier 1 client (`ophix-client-core`'s shared commands, `ophix-task-client`'s `core.py`) branches purely on HTTP status code and only ever *displays* the JSON body text to the operator, never parses it for control flow — so translating it is safe and has no client-compatibility risk.
