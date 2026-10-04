@@ -10,6 +10,15 @@ covers the real deployment path.
 
 ## Before you start / Prerequisites
 
+Not sure what's already on your server? A few one-liners to check:
+
+```bash
+python3 --version   # need 3.10 or later
+openssl version     # only relevant if self-issuing a certificate (see below)
+nginx -v
+mysql --version     # only relevant if you're using MariaDB/MySQL (ophix-dbengine-mariadb)
+```
+
 You will need:
 
 - A Linux server with:
@@ -199,6 +208,9 @@ That's it - you're done. The admin UI should now be live at `https://<your-hostn
 
 ## Next steps
 
+- Make sure `<your-hostname>` actually resolves to this host's IP - a DNS record update (or,
+  for local testing, a `/etc/hosts` entry) is often the last piece still outstanding at this
+  point, and the admin UI won't be reachable until it's in place.
 - Login with your superuser account
 - Go to **Admin → Hosts** and create a Host entry for each machine that will run a client - clients
   register themselves against a Host's IP on first run.
