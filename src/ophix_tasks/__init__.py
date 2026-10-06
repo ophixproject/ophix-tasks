@@ -10,6 +10,17 @@ def install_configure(conf, command):
     conf.set("backup", "targets_extra", ",".join(filter(None, [existing, "tasks"])))
 
 
+def get_doc_tokens():
+    """
+    Optional hook discovered by ophix-docs (if installed), for {{ token }}
+    substitution in shared markdown like the Client Quickstart doc.
+    """
+    return {
+        "client_package": "ophix-task-client",
+        "client_command": "task-client",
+    }
+
+
 def get_revisions_targets():
     """
     Optional hook discovered by ophix-revisions (if installed).

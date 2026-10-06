@@ -1,5 +1,13 @@
 # Ophix Tasks Release Notes
 
+## Unreleased
+
+- Added `get_doc_tokens()` hook, discovered by `ophix-docs` (if installed) for
+  `{{ token }}` substitution in shared markdown. Contributes `client_package`
+  (`ophix-task-client`) and `client_command` (`task-client`) so the generic
+  Client Quickstart doc in `ophix-server-base` can render this domain's correct
+  example instead of staying generic.
+
 ## 2026.10.04.01
 
 - Added `installation.md` — a full production-style install walkthrough (dedicated service
