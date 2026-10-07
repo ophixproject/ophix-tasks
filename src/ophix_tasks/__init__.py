@@ -18,6 +18,7 @@ def get_doc_tokens():
     return {
         "client_package": "ophix-task-client",
         "client_command": "task-client",
+        "client_venv": ".task-env",
     }
 
 
