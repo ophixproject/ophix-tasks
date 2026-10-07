@@ -20,6 +20,7 @@ def get_doc_tokens():
         "client_command": "task-client",
         "client_venv": ".task-env",
         "client_env": ".task.env",
+        "client_env_prefix": "TASKSERVER",
     }
 
 
