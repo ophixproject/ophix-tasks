@@ -13,6 +13,10 @@
   the env var name prefix used inside `client_env` (e.g. `TASKSERVER_URL`),
   confirmed against `task_client`'s own `server_url_key` config value rather
   than assumed.
+- `get_doc_tokens()` now also contributes `artifact_name` (`Schedule`) and
+  `artifact_name_lower` (`schedule`) — the domain-specific term for what a
+  client gets linked to, confirmed against the `Schedule` model's own
+  `verbose_name` rather than assumed.
 
 ## 2026.10.07.01
 

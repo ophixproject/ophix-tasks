@@ -21,6 +21,8 @@ def get_doc_tokens():
         "client_venv": ".task-env",
         "client_env": ".task.env",
         "client_env_prefix": "TASKSERVER",
+        "artifact_name": "Schedule",
+        "artifact_name_lower": "schedule",
     }
 
 
