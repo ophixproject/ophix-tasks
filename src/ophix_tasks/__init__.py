@@ -19,6 +19,7 @@ def get_doc_tokens():
         "client_package": "ophix-task-client",
         "client_command": "task-client",
         "client_venv": ".task-env",
+        "client_env": ".task.env",
     }
 
 
