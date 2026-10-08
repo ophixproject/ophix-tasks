@@ -216,4 +216,4 @@ That's it - you're done. The admin UI should now be live at `https://<your-hostn
   register themselves against a Host's IP on first run.
 - See the **Client Quickstart** doc (in the admin's Documentation panel, if `ophix-docs` is
   installed) for how to bootstrap a client against this server.  
-- For `ophix-tasks` specific instructions go to **Documentation → Search** and search for `task-client`.  You will need to install `ophix-task-client` and at least one of `ophix-task-crontab` and `ophix-task-systemd`. Unlike other Ophix clients, stick to one `ophix-task-client` per user account - running more than one just means they fight over the same cron/systemd output.
+- For `ophix-tasks` specific instructions go to **Documentation → Search** and search for `task-client`. You will need to create a virtual environment and install `ophix-task-client` and at least one of `ophix-task-crontab` and `ophix-task-systemd` once for each user that you want to manage tasks for. The user can be root, a regular system user, or a service account.
