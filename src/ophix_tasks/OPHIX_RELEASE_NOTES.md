@@ -1,5 +1,14 @@
 # Ophix Tasks Release Notes
 
+## Unreleased
+
+- `get_revisions_targets()`'s `tasks` entry now declares a precise `"models"` list
+  (`Schedule`, `ScheduledTask`), matching exactly what `export_tasks` queries by
+  default. `Scheduler` (a lookup table), `TaskExecutionLog` (operational data), and
+  `ClientScheduleAccess` join records no longer rely on the coarser `app_label`-only
+  fallback to stay excluded from triggering a re-export. Requires
+  `ophix-revisions>=2026.10.09.03`.
+
 ## 2026.10.08.01
 
 - `task-backup.md`'s link to `ophix-server-base`'s "Server Backup and Migration" doc now

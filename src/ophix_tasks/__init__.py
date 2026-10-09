@@ -34,6 +34,12 @@ def get_revisions_targets():
         {
             "name": "tasks",
             "app_label": "ophix_tasks",
+            # Precise model match — export_tasks exports Schedule and its
+            # ScheduledTask children by default. Scheduler is a lookup
+            # table, TaskExecutionLog is operational data, and
+            # ClientScheduleAccess needs --include-client-links — none of
+            # those are included in the export the revisions worker runs.
+            "models": ["ophix_tasks.schedule", "ophix_tasks.scheduledtask"],
             "export_command": "export_tasks",
             "encrypted": False,
             "stable": True,
