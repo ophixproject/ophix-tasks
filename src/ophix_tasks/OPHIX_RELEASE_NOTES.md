@@ -1,6 +1,6 @@
 # Ophix Tasks Release Notes
 
-## Unreleased
+## 2026.10.09.01
 
 - `get_revisions_targets()`'s `tasks` entry now declares a precise `"models"` list
   (`Schedule`, `ScheduledTask`), matching exactly what `export_tasks` queries by
