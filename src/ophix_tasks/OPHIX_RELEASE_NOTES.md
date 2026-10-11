@@ -1,5 +1,12 @@
 # Ophix Tasks Release Notes
 
+## 2026.10.11.01
+
+- `README.md`'s `installation.md` link was a bare relative path, which PyPI's rendered README
+  resolves against `pypi.org`, not this repo — the link 404'd on the PyPI project page.
+  `installation.md` is a repo-root-only doc (not shipped inside the pip package), so pointed
+  it at the real GitHub blob URL instead.
+
 ## 2026.10.10.01
 
 - `get_revisions_targets()`'s `tasks` entry now declares `records_key="schedules"`

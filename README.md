@@ -10,7 +10,7 @@ Operators define named Schedules containing task definitions in one central admi
 
 ## Installation
 
-See [installation.md](installation.md) for the full step-by-step guide — service user, TLS setup, the guided installer, and getting the service running under nginx and systemd.
+See [installation.md](https://github.com/ophixproject/ophix-tasks/blob/main/installation.md) for the full step-by-step guide — service user, TLS setup, the guided installer, and getting the service running under nginx and systemd.
 
 ---
 
